@@ -17,7 +17,7 @@
           });
 
           // 🚪 Участник покинул чат
-          bot.on('left_chat_member', (msg) => {
+         bot.on('left_chat_member', (msg) => {
             console.log('вышел из сата');
             const user = msg.left_chat_member;
 
@@ -31,5 +31,6 @@
             bot.sendMessage(notifyChatId, message, {
               reply_to_message_id: threadMessageId
             });
-          });
+          }); 
+          
         };

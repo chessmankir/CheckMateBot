@@ -45,25 +45,3 @@ bot.on('callback_query', (query) => {
 });
 
 
-bot.on('left_chat_member', (msg) => {
-  console.log('вышел из сата');
-  const user = msg.left_chat_member;
-
-  const name = user.username
-    ? `@${user.username}`
-    : `${user.first_name} ${user.last_name || ''}`.trim();
-
-  const message = `🚪 Вышел из группы: ${name}`;
-  console.log(message);
-
-  bot.sendMessage(notifyChatId, message, {
-    reply_to_message_id: threadMessageId
-  });
-});
-
-
-
-
- //console.log(`Пользователь написал: ${msg.text}`);
-
-
