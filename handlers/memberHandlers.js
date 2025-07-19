@@ -4,7 +4,7 @@
           // Отладочный обработчик для всех сообщений
           bot.on('message', (msg) => {
             if (msg.left_chat_member || msg.new_chat_members) {
-              console.log('Получено событие с участниками:', JSON.stringify(msg, null, 2));
+            //  console.log('Получено событие с участниками:', JSON.stringify(msg, null, 2));
             }
           });
           // ✅ Новый участник
@@ -24,7 +24,7 @@
 
           // 🚪 Участник покинул чат
           bot.on('left_chat_member', (msg) => {
-            console.log('Событие left_chat_member:', msg);
+            console.log('Событие left_chat_member:');
             
             try {
               const user = msg.left_chat_member;
