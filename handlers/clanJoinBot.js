@@ -49,7 +49,7 @@ module.exports = function(bot, notifyChatId) {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
 
-    if (msg.text.startsWith('/')) return;
+    if (!msg.text || msg.text.startsWith('/')) return;
     if (!usersInProcess.has(userId)) return;
 
     const user = usersInProcess.get(userId);
