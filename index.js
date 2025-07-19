@@ -2,6 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const { token, notifyChatId, threadMessageId } = require('./config');
 const bot = new TelegramBot(token, { polling: true });
+console.log(token)
 
 // Обработка ошибок polling
 bot.on('polling_error', (error) => {
