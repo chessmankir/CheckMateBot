@@ -2,6 +2,18 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const { token, notifyChatId, threadMessageId } = require('./config');
 const bot = new TelegramBot(token, { polling: true });
+
+// Обработка ошибок polling
+bot.on('polling_error', (error) => {
+  console.log('Детали ошибки polling:', error.code, error.message);
+  if (error.code === 'EFATAL') {
+    console.log('Критическая ошибка - возможно неверный токен или бот уже запущен');
+  }
+});
+
+bot.on('error', (error) => {
+  console.log('Общая ошибка бота:', error);
+});
 // const memberHandlers = require('./handlers/memberHandlers');
 require('./handlers/memberHandlers')(bot, notifyChatId, threadMessageId);
 require('./handlers/clanJoinBot')(bot, notifyChatId);
