@@ -4,6 +4,7 @@ const DATA_FILE = 'clanMembers.json';
 const usersInProcess = new Map();
 
 function saveToJSON(userData) {
+  console.log('save')
   let data = [];
   if (fs.existsSync(DATA_FILE)) {
     data = JSON.parse(fs.readFileSync(DATA_FILE));
@@ -13,6 +14,7 @@ function saveToJSON(userData) {
 }
 
 module.exports = function(bot, notifyChatId) {
+  console.log('clanJoinBot');
   // Команда /join
   bot.onText(/\/join/, (msg) => {
     const chatId = msg.chat.id;
@@ -27,6 +29,50 @@ module.exports = function(bot, notifyChatId) {
       }
     });
   });
+
+  
+
+  bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+
+    // Приветственный текст
+    const welcomeText = 'Добро пожаловать в комьюнити Checkmate! ♟️';
+
+    // Отправляем изображение
+    bot.sendPhoto(chatId, fs.readFileSync('./images/welcome.jpg'), {
+      caption: welcomeText,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: 'Тгк ChessmanKir 🧩', url: 'https://t.me/chessmankirLive' },
+            { text: 'Канал партнёров 🤝', url: 'https://t.me/winepubgm' }
+          ],
+          [
+            { text: 'Хочешь вступить в клан?', callback_data: 'join_clan' }
+          ]
+        ]
+      }
+    });
+  });
+
+  // Обработка нажатия "Хочешь вступить в клан?"
+  bot.on('callback_query', (query) => {
+    const chatId = query.message.chat.id;
+
+    if (query.data === 'join_clan') {
+      bot.sendMessage(chatId, 'Ты хочешь вступить в клан?', {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: 'Да ✅', callback_data: 'join_yes' },
+              { text: 'Нет ❌', callback_data: 'join_no' }
+            ]
+          ]
+        }
+      });
+    }
+  });
+
 
   // Обработка кнопок Да/Нет
   bot.on('callback_query', (query) => {
