@@ -13,7 +13,7 @@ function saveToJSON(userData) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-module.exports = function(bot, notifyChatId) {
+module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
   console.log('clanJoinBot');
   // Команда /join
   bot.onText(/\/join/, (msg) => {
@@ -39,13 +39,13 @@ module.exports = function(bot, notifyChatId) {
     const welcomeText = 'Добро пожаловать в комьюнити Checkmate! ♟️';
 
     // Отправляем изображение
-    bot.sendPhoto(chatId, fs.readFileSync('./images/welcome.jpg'), {
+    bot.sendPhoto(chatId, fs.readFileSync('./Images/IMG_3371.png'), {
       caption: welcomeText,
       reply_markup: {
         inline_keyboard: [
           [
             { text: 'Тгк ChessmanKir 🧩', url: 'https://t.me/chessmankirLive' },
-            { text: 'Канал партнёров 🤝', url: 'https://t.me/winepubgm' }
+            { text: 'Новости Pubg 🤝', url: 'https://t.me/winepubgm' }
           ],
           [
             { text: 'Хочешь вступить в клан?', callback_data: 'join_clan' }
@@ -121,8 +121,8 @@ module.exports = function(bot, notifyChatId) {
         telegram_username: msg.from.username || '',
         ...user.data
       });
-
-      bot.sendMessage(chatId, `🎉 Ты принят в клан!\n📥 Приглашение: [ссылка на вступление]`);
+      
+      bot.sendMessage(chatId, `🎉 Ты принят в клан!\n📥 Приглашение:` + inviteLink1);
       usersInProcess.delete(userId);
     }
   });

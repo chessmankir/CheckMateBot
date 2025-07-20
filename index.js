@@ -1,6 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 
-const { token, notifyChatId, threadMessageId } = require('./config');
+const { token, notifyChatId, threadMessageId, inviteLink1, inviteLink2 } = require('./config');
 const bot = new TelegramBot(token, { polling: true });
 console.log(token);
 
@@ -17,7 +17,8 @@ bot.on('error', (error) => {
 });
 // const memberHandlers = require('./handlers/memberHandlers');
 require('./handlers/memberHandlers')(bot, notifyChatId, threadMessageId);
-/require('./handlers/clanJoinBot')(bot, notifyChatId);
+require('./handlers/inviteGenerator')(bot); // ← генератор инвайтов
+require('./handlers/clanJoinBot')(bot, notifyChatId, inviteLink1, inviteLink2);
 
 console.log('запускаю бота с токеном', threadMessageId);
 

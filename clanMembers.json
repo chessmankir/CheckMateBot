@@ -6,5 +6,29 @@
     "name": "Kir",
     "age": "31",
     "city": "Курск"
+  },
+  {
+    "telegram_id": 6036046121,
+    "telegram_username": "ChessmanKir",
+    "pubgId": "13232",
+    "name": "Kir",
+    "age": "27",
+    "city": "Kursk"
+  },
+  {
+    "telegram_id": 6036046121,
+    "telegram_username": "ChessmanKir",
+    "pubgId": "2494949",
+    "name": "Kira",
+    "age": "20",
+    "city": "Липецк"
+  },
+  {
+    "telegram_id": 1737886377,
+    "telegram_username": "winepubg",
+    "pubgId": "Lox",
+    "name": "God",
+    "age": "12",
+    "city": "NEW YORK"
   }
 ]
