@@ -7,7 +7,15 @@ function generateCode(clanNumber) {
 console.log(code);
   let codes = [];
   if (fs.existsSync(path)) {
-    codes = JSON.parse(fs.readFileSync(path));
+    try {
+      const fileContent = fs.readFileSync(path, 'utf8');
+      if (fileContent.trim()) {
+        codes = JSON.parse(fileContent);
+      }
+    } catch (error) {
+      console.log('Ошибка чтения файла invite_codes.json:', error.message);
+      codes = [];
+    }
   }
 
   codes.push(newCode);
