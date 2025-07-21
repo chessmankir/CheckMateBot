@@ -41,6 +41,7 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     // Отправляем изображение
     bot.sendPhoto(chatId, fs.readFileSync('./Images/IMG_3371.png'), {
       caption: welcomeText,
+      filename: 'welcome_image.png',
       reply_markup: {
         inline_keyboard: [
           [
