@@ -34,7 +34,11 @@ module.exports = function(bot) {
 
     const code = generateCode(clanNumber);
     console.log(code);
-    bot.sendMessage(msg.chat.id, `🎟️ Инвайт-код: <code>${code.code}</code>\n👑 Клан №${clanNumber}`, {
+    bot.sendMessage(msg.chat.id, `🎟️ Инвайт-код:`, {
+      parse_mode: 'HTML'
+    });
+    
+    bot.sendMessage(msg.chat.id, `${code.code}`, {
       parse_mode: 'HTML'
     });
   });

@@ -85,8 +85,9 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     }
 
     if (query.data === 'join_yes') {
-      usersInProcess.set(userId, { step: 'id', data: {} });
-      bot.sendMessage(chatId, 'Отлично! Введи свой PUBG ID:');
+      usersInProcess.set(userId, { step: 'invite', data: {} });
+      bot.sendMessage(chatId, 'Введи свой инвайт-код:');
+      
     }
   });
 
@@ -101,7 +102,22 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     const user = usersInProcess.get(userId);
     const text = msg.text.trim();
 
-    if (user.step === 'id') {
+    if (user.step === 'invite'){
+      const inviteCode = text;
+      const codes = fs.existsSync('./data/invite_codes.json')
+        ? JSON.parse(fs.readFileSync('./data/invite_codes.json'))
+        : [];
+
+      const found = codes.find(c => c.code === inviteCode && !c.used);
+      console.log(found);
+      if (!found) {
+        bot.sendMessage(chatId, '❌ Код недействителен или уже использован. Введи снова:');
+        return;
+      }
+      user.step = 'id';
+    }
+
+   else if (user.step === 'id') {
       user.data.pubgId = text;
       user.step = 'name';
       bot.sendMessage(chatId, 'Теперь введи своё имя:');
