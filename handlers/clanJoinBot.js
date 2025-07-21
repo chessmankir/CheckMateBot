@@ -116,6 +116,8 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
         return;
       }
       user.step = 'id';
+      bot.sendMessage(chatId, 'Отлично! Теперь введи свой PUBG ID:');
+      return;
     }
 
    else if (user.step === 'id') {
