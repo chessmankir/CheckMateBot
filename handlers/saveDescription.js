@@ -45,6 +45,7 @@ function saveOrUpdateDescription(newEntry) {
 
   if (index === -1) {
     // 3. Не нашли ни по actor_id, ни по тегу — добавляем нового
+    console.log(data);
     data.push(newEntry);
   }
 
@@ -97,6 +98,6 @@ module.exports = function (bot) {
       timestamp: new Date().toISOString()
     };
     saveOrUpdateDescription(entry);
-    bot.sendMessage(chatId, `✅ Описание для ${targetUsername} сохранено.`);
+    bot.sendMessage(chatId, `✅ Описание для ${targetUsername} сохранено.`, {reply_to_message_id: msg.message_id });
   });
 };

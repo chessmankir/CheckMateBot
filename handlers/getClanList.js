@@ -38,6 +38,6 @@ module.exports = function (bot) {
     const clanLimit = clanLimits[clanNumber];
     const message = `Список участников клана Checkmate ${clanNumber} — ${members.length}/${clanLimit}\n\n${lines.join('\n')}`;
 
-    bot.sendMessage(chatId, message);
+    bot.sendMessage(chatId, message, {reply_to_message_id: msg.message_id } );
   });
 };

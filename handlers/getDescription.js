@@ -42,6 +42,8 @@ module.exports = function (bot, usernameMap) {
 🎂 <b>Возраст:</b> ${entry.age}
 🏙 <b>Город:</b> ${entry.city}`;
 
-    bot.sendMessage(chatId, text, { parse_mode: 'HTML' });
+    bot.sendMessage(chatId, text,
+    { parse_mode: 'HTML',
+      reply_to_message_id: msg.message_id });
   });
 };

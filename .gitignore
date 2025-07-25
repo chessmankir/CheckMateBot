@@ -131,3 +131,4 @@ dist
 
 # Replit debugger
 .breakpoints
+./data/clan_members.json
