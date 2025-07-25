@@ -14,12 +14,9 @@ function saveToJSON(userData) {
 }
 
 module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
-  console.log('clanJoinBot');
   // Команда /join
   bot.onText(/\/join/, (msg) => {
     const chatId = msg.chat.id;
-    console.log('join');
-
     bot.sendMessage(chatId, 'Хочешь вступить в клан?', {
       reply_markup: {
         inline_keyboard: [
@@ -29,8 +26,6 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
       }
     });
   });
-
-  
 
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
@@ -110,14 +105,18 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
         : [];
 
       const found = codes.find(c => c.code === inviteCode && !c.used);
-      console.log(found);
       if (!found) {
         bot.sendMessage(chatId, '❌ Код недействителен или уже использован. Введи снова:');
         return;
       }
+
+      // Отметить как использованный
+      found.used = true;
+      fs.writeFileSync('./data/invite_codes.json', JSON.stringify(codes, null, 2));
+
+      user.data.clan = found.clan; // ← сохраняем номер клана
       user.step = 'id';
-      bot.sendMessage(chatId, 'Отлично! Теперь введи свой PUBG ID:');
-      return;
+      bot.sendMessage(chatId, 'Код принят. Теперь введи свой PUBG ID:');
     }
 
    else if (user.step === 'id') {
