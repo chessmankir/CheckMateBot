@@ -32,16 +32,17 @@ async function handleMessage(bot, msg, botToken) {
     const actorId = parts[1];
 
     if (!actorId || !actorId.startsWith('user')) {
-      return bot.sendMessage(chatId, '❗ Используй: !тег user123456789');
+      return bot.sendMessage(chatId, '❗ Используй: !тег user123456789', {reply_to_message_id: msg.message_id });
     }
 
     try {
       const user = await getUserInfo(botToken, actorId);
       const name = user.first_name || '';
       const username = user.username ? `@${user.username}` : '⛔️ Юзернейм отсутствует';
-      return bot.sendMessage(chatId, `👤 ${name} ${username}`);
+      return bot.sendMessage(chatId, `👤 ${name} ${username}`,  
+                {reply_to_message_id: msg.message_id });
     } catch (error) {
-      return bot.sendMessage(chatId, `❌ Ошибка: ${error.message}`);
+      return bot.sendMessage(chatId, `❌ Ошибка: ${error.message}`, {reply_to_message_id: msg.message_id } );
     }
   }
 

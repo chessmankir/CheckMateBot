@@ -29,7 +29,7 @@ module.exports = function (bot, usernameMap) {
     }
     
     if (!entry) {
-      bot.sendMessage(chatId, `❌ Описание не найдено для ${tag}`);
+      bot.sendMessage(chatId, `❌ Описание не найдено для ${tag}`, {reply_to_message_id: msg.message_id } );
       return;
     }
 

@@ -71,13 +71,13 @@ module.exports = function (bot) {
     const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
     console.log(lines);
     if (lines.length < 6) {
-      bot.sendMessage(chatId, '❗ Формат неверный. Нужно 6 строк:\n+описание1 Имя\nНик\nPUBG ID\nВозраст\nГород');
+      bot.sendMessage(chatId, '❗ Формат неверный. Нужно 6 строк:\n+описание1 Имя\nНик\nPUBG ID\nВозраст\nГород',   {reply_to_message_id: msg.message_id });
       return;
     }
 
     const tagMatch = lines[0].match(/@(\w+)/);
     if (!tagMatch) {
-      bot.sendMessage(chatId, '❗ Укажи тег: +описание1 @nickname');
+      bot.sendMessage(chatId, '❗ Укажи тег: +описание1 @nickname', {reply_to_message_id: msg.message_id });
       return;
     }
 
