@@ -16,14 +16,30 @@ bot.on('error', (error) => {
   console.log('Общая ошибка бота:', error);
 });
 const usernameMap = new Map();
+
+const { google, displayvideo_v1beta } = require('googleapis');
+const path = require('path');
+
+const SPREADSHEET_ID = '11BRhGaUWPd7dg_lPBHng0mXlpNJcPyRUkPuwSAQOx78';
+const SHEET_NAME = 'Clan';
+
+const credentials = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
+
+const auth = new google.auth.GoogleAuth({
+  credentials,
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
+
+const testConnection = require('./handlers/dbconnection');
+
 // const memberHandlers = require('./handlers/memberHandlers');
 require('./handlers/memberHandlers')(bot, notifyChatId, threadMessageId);
 require('./handlers/inviteGenerator')(bot); // ← генератор инвайтов
 require('./handlers/clanJoinBot')(bot, notifyChatId, inviteLink1, inviteLink2);
-require('./handlers/saveDescription')(bot, usernameMap);
-require('./handlers/getDescription')(bot, usernameMap);
-require('./handlers/getClanList')(bot, usernameMap);
-require('./handlers/findMember')(bot, usernameMap);
+require('./handlers/saveDescription')(bot);
+require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
+require('./handlers/getClanList')(bot, auth, SPREADSHEET_ID);
+require('./handlers/findMember')(bot, auth, SPREADSHEET_ID);
 const keepAlive = require('./keepAlive'); // ← подключаем сервер
 
 // 🟢 Запускаем HTTP-сервер (не даст Replit заснуть)

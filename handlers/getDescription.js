@@ -1,30 +1,14 @@
-const { google } = require('googleapis');
-const path = require('path');
-
-const SPREADSHEET_ID = '11BRhGaUWPd7dg_lPBHng0mXlpNJcPyRUkPuwSAQOx78';
 const SHEET_NAME = 'Clan'; // название листа в Google Sheets
+const getPlayerDescription = require('./getPlayerDescription');
 
-const credentials = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
-
-const auth = new google.auth.GoogleAuth({
-  credentials,
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-});
-
-/*const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(__dirname, '../checkmatekey.json'),
-  scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-});*/
-
-module.exports = function (bot) {
+module.exports = function (bot, auth, SPREADSHEET_ID) {
   bot.onText(/^!описание\s+@(\S+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const requestedUsername = `@${match[1]}`;
-    console.log(requestedUsername);
     try {
+      const { google, displayvideo_v1beta } = require('googleapis');
       const client = await auth.getClient();
       const sheets = google.sheets({ version: 'v4', auth: client });
-
       const res = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: SHEET_NAME,

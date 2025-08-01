@@ -1,45 +1,38 @@
-const fs = require('fs');
-const path = './data/invite_codes.json';
+const { v4: uuidv4 } = require('uuid');
+const db = require('./db');
 
-function generateCode(clanNumber) {
-  const code = `clan-${Math.floor(100000 + Math.random() * 900000)}`;
-  const newCode = { code, clan: clanNumber, used: false };
-console.log(code);
-  let codes = [];
-  if (fs.existsSync(path)) {
-    try {
-      const fileContent = fs.readFileSync(path, 'utf8');
-      if (fileContent.trim()) {
-        codes = JSON.parse(fileContent);
-      }
-    } catch (error) {
-      console.log('Ошибка чтения файла invite_codes.json:', error.message);
-      codes = [];
-    }
-  }
-
-  codes.push(newCode);
-  fs.writeFileSync(path, JSON.stringify(codes, null, 2));
-
-  return newCode;
+function generateCode() {
+  return 'CLAN-' + Math.floor(100000 + Math.random() * 900000);
 }
 
 module.exports = function(bot) {
-  bot.onText(/!инвайт(\d+)/, (msg, match) => {
+  bot.onText(/!инвайт(\d+)/, async (msg, match) => {
     const clanNumber = parseInt(match[1]);
-    console.log(clanNumber);
+
     if (isNaN(clanNumber)) {
-      return bot.sendMessage(msg.chat.id, '❗ Укажи номер клана: !инвайт 1');
+      return bot.sendMessage(msg.chat.id, '❗ Укажи номер клана: !инвайт1, !инвайт2 и т.д.', {
+        reply_to_message_id: msg.message_id,
+      });
     }
 
-    const code = generateCode(clanNumber);
-    console.log(code);
-    bot.sendMessage(msg.chat.id, `🎟️ Инвайт-код:`, {
-      parse_mode: 'HTML'
-    });
-    
-    bot.sendMessage(msg.chat.id, `${code.code}`, {
-      parse_mode: 'HTML'
-    });
+    const inviteCode = generateCode();
+
+    try {
+      await db.query(
+        'INSERT INTO invites (id, invite_code, is_active, clan_name) VALUES ($1, $2, $3, $4)',
+        [uuidv4(), inviteCode, true, clanNumber]
+      );
+
+      bot.sendMessage(msg.chat.id, `🎟️ Инвайт-код для клана №${clanNumber}:\n<code>${inviteCode}</code>`, {
+        parse_mode: 'HTML',
+        reply_to_message_id: msg.message_id,
+      });
+
+    } catch (err) {
+      console.error('Ошибка при сохранении инвайта:', err.message);
+      bot.sendMessage(msg.chat.id, '❗ Ошибка при создании инвайта.', {
+        reply_to_message_id: msg.message_id,
+      });
+    }
   });
 };

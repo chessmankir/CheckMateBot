@@ -1,11 +1,3 @@
-const { google } = require('googleapis');
-const { JWT } = require('google-auth-library');
-
-const credentials = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
-
-
-// путь к JSON-ключу
-const SPREADSHEET_ID = '11BRhGaUWPd7dg_lPBHng0mXlpNJcPyRUkPuwSAQOx78';
 const SHEET_NAME = 'Clan'; // проверь, как у тебя назван лист
 
 const clanLimits = {
@@ -14,16 +6,11 @@ const clanLimits = {
   3: 60
 };
 
-async function getSheetData() {
-  const auth = new JWT({
-    email: credentials.client_email,
-    key: credentials.private_key,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
-  });
+async function getSheetData(auth, SPREADSHEET_ID) {
+   const { google, displayvideo_v1beta } = require('googleapis');
+   const sheets = google.sheets({ version: 'v4', auth });
 
-  const sheets = google.sheets({ version: 'v4', auth });
-
-  const response = await sheets.spreadsheets.values.get({
+   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
     range: `${SHEET_NAME}!A2:G`, // A — actor_id, B — username, G — clan
   });
@@ -31,7 +18,7 @@ async function getSheetData() {
   return response.data.values || [];
 }
 
-module.exports = function (bot) {
+module.exports = function (bot, auth, SPREADSHEET_ID) {
   // !списокN
   bot.onText(/!список(\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
@@ -44,7 +31,7 @@ module.exports = function (bot) {
     }
 
     try {
-      const rows = await getSheetData();
+      const rows = await getSheetData(auth, SPREADSHEET_ID);
       const members = rows.filter(row => row[6]?.toString() === clanNumber.toString());
 
       if (members.length === 0) {
