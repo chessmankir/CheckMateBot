@@ -1,9 +1,11 @@
 const saveDescription = require('./saveDescriptionFunc');
+const isAdminChat = require('./../admin/permissionAdminChat');
 
 // 📬 Обработчик команды "+описание1 @ник"
 module.exports = function (bot) {
   bot.onText(/^\+описание1\s+@(\S+)\n(.+)/s, async (msg, match) => {
     const chatId = msg.chat.id;
+    if (!isAdminChat(chatId)) return;
     const from = msg.from;
     const target_username = `@${match[1]}`;
     const lines = match[2].trim().split('\n');

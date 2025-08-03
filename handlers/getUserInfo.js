@@ -1,4 +1,5 @@
 const https = require('https');
+const isAllowedChat = require('../admin/permissionChats');
 
 // Функция получения информации о пользователе по actor_id
 function getUserInfo(botToken, actorId) {

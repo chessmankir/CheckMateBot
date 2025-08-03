@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
+const isAllowedChat = require('../admin/permissionChats');
 
 function generateCode() {
   return 'CLAN-' + Math.floor(100000 + Math.random() * 900000);

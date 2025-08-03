@@ -1,46 +1,53 @@
 const SHEET_NAME = 'Clan'; // название листа в Google Sheets
-const getPlayerDescription = require('./getPlayerDescription');
+const getPlayerDescription = require('./getDecriptionFunc');
+const isAllowedChat = require('./../admin/permissionChats');
 
 module.exports = function (bot, auth, SPREADSHEET_ID) {
-  bot.onText(/^!описание\s+@(\S+)/, async (msg, match) => {
+  bot.onText(/^!тест/, async (msg, match) => {
+     console.log('test');
+     console.log(msg.chat.id);
+  });
+  bot.onText(/^!описание(?:\s+@(\S+))?/, async (msg, match) => {
     const chatId = msg.chat.id;
-    const requestedUsername = `@${match[1]}`;
-    try {
-      const { google, displayvideo_v1beta } = require('googleapis');
-      const client = await auth.getClient();
-      const sheets = google.sheets({ version: 'v4', auth: client });
-      const res = await sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
-        range: SHEET_NAME,
+    if (!isAllowedChat(chatId)) return;
+    console.log(chatId);
+
+    // Если указан тег — берём его, иначе берём username автора сообщения
+    const requestedUsername = match[1]
+      ? `@${match[1]}`
+      : msg.from.username
+      ? `@${msg.from.username}`
+      : null;
+    console.log(requestedUsername);
+    if (!requestedUsername) {
+      return bot.sendMessage(chatId, '❗ У тебя не установлен username в Telegram.', {
+        reply_to_message_id: msg.message_id,
       });
+    }
 
-      const rows = res.data.values || [];
-      const usernameIndex = 2;
-      const playerRow = rows.find((row, index) => index > 0 && row[usernameIndex] === requestedUsername);
+    try {
+      const player = await getPlayerDescription(requestedUsername, auth, SPREADSHEET_ID);
 
-      if (!playerRow) {
+      if (!player) {
         return bot.sendMessage(chatId, `❌ Описание для ${requestedUsername} не найдено.`, {
           reply_to_message_id: msg.message_id,
         });
       }
-      console.log(playerRow);
-      // Формируем ответ
+
       const response = `
 📄 Описание игрока ${requestedUsername}:
 
-👤 Имя: ${playerRow[0] || '—'}
-🏷 Ник: ${playerRow[1] || '—'}
-🎮 PUBG ID: ${playerRow[3] || '—'}
-🎂 Возраст: ${playerRow[4] || '—'}
-📍 Город: ${playerRow[5] || '—'}
+👤 Имя: ${player.name}
+🏷 Ник: ${player.nick}
+🎮 PUBG ID: ${player.pubgId}
+🎂 Возраст: ${player.age}
+📍 Город: ${player.city}
       `.trim();
 
       bot.sendMessage(chatId, response, {
         reply_to_message_id: msg.message_id,
       });
-
     } catch (error) {
-      console.error('Ошибка при получении описания:', error);
       bot.sendMessage(chatId, '❌ Произошла ошибка при получении описания.', {
         reply_to_message_id: msg.message_id,
       });

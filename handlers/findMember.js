@@ -1,4 +1,5 @@
 const SHEET_NAME = 'Clan';
+const isAllowedChat = require('./../admin/permissionChats');
 
 async function getSheetData(auth, SPREADSHEET_ID) {
   const { google, displayvideo_v1beta } = require('googleapis');
@@ -14,6 +15,7 @@ async function getSheetData(auth, SPREADSHEET_ID) {
 module.exports = function (bot,  auth, SPREADSHEET_ID) {
   bot.onText(/!поиск\s+(.+)/i, async (msg, match) => {
     const chatId = msg.chat.id;
+    if (!isAllowedChat(chatId)) return;
     const query = match[1].trim().toLowerCase();
 
     try {

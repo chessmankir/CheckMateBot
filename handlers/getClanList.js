@@ -5,6 +5,7 @@ const clanLimits = {
   2: 55,
   3: 60
 };
+const isAllowedChat = require('./../admin/permissionChats');
 
 async function getSheetData(auth, SPREADSHEET_ID) {
    const { google, displayvideo_v1beta } = require('googleapis');
@@ -22,6 +23,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
   // !списокN
   bot.onText(/!список(\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
+    if (!isAllowedChat(chatId)) return;
     const clanNumber = parseInt(match[1]);
 
     if (!clanLimits[clanNumber]) {

@@ -8,6 +8,8 @@ async function getPlayerDescription(username, auth, spreadsheetId) {
     username = '@' + username;
   }
 
+  const usernameLower = username.toLowerCase();
+
   try {
     const client = await auth.getClient();
     const sheets = google.sheets({ version: 'v4', auth: client });
@@ -20,7 +22,11 @@ async function getPlayerDescription(username, auth, spreadsheetId) {
     const rows = res.data.values || [];
     const usernameIndex = 2;
 
-    const playerRow = rows.find((row, index) => index > 0 && row[usernameIndex] === username);
+    const playerRow = rows.find((row, index) => {
+      if (index === 0) return false;
+      const cellValue = (row[usernameIndex] || '').toLowerCase();
+      return cellValue === usernameLower;
+    });
 
     if (!playerRow) return null;
 
@@ -39,3 +45,4 @@ async function getPlayerDescription(username, auth, spreadsheetId) {
 }
 
 module.exports = getPlayerDescription;
+

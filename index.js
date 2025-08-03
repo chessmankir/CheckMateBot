@@ -40,6 +40,8 @@ require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
 require('./handlers/getClanList')(bot, auth, SPREADSHEET_ID);
 require('./handlers/findMember')(bot, auth, SPREADSHEET_ID);
+const handleChannelForward = require('./handlers/channelForward');
+handleChannelForward(bot, '@rabotaunaotebis', process.env.ADMIN_CHAT);
 const keepAlive = require('./keepAlive'); // ← подключаем сервер
 
 // 🟢 Запускаем HTTP-сервер (не даст Replit заснуть)
