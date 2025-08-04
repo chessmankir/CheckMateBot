@@ -29,7 +29,7 @@ module.exports = function (bot) {
       date: Date.now()
     };
     console.log(data);
-    await saveMemberDb(dataToSave);
+    await saveMemberDb(data);
     await saveDescription(data);
 
     bot.sendMessage(chatId, `✅ Описание для ${target_username} сохранено.`, {
