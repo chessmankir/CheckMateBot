@@ -1,5 +1,6 @@
 const saveDescription = require('./saveDescriptionFunc');
 const isAdminChat = require('./../admin/permissionAdminChat');
+const saveMemberDb = require('./saveMemberDb');
 
 // 📬 Обработчик команды "+описание1 @ник"
 module.exports = function (bot) {
