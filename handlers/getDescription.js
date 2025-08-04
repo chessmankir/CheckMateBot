@@ -1,32 +1,30 @@
-const SHEET_NAME = 'Clan'; // название листа в Google Sheets
-const getPlayerDescription = require('./getDecriptionFunc');
+const getPlayerDescription = require('./../db/getDescriptionDb');
 const isAllowedChat = require('./../admin/permissionChats');
-
-module.exports = function (bot, auth, SPREADSHEET_ID) {
-  bot.onText(/^!тест/, async (msg, match) => {
-     console.log('test');
-     console.log(msg.chat.id);
-  });
+console.log('description');
+module.exports = function (bot) {
   bot.onText(/^!описание(?:\s+@(\S+))?/, async (msg, match) => {
     const chatId = msg.chat.id;
+    console.log('description');
     if (!isAllowedChat(chatId)) return;
-    console.log(chatId);
-
-    // Если указан тег — берём его, иначе берём username автора сообщения
+    console.log('permisson');
+    // 1. Получаем тег или actor_id
     const requestedUsername = match[1]
       ? `@${match[1]}`
       : msg.from.username
       ? `@${msg.from.username}`
       : null;
-    console.log(requestedUsername);
+
+    const actorId = msg.from.id;
+
     if (!requestedUsername) {
       return bot.sendMessage(chatId, '❗ У тебя не установлен username в Telegram.', {
         reply_to_message_id: msg.message_id,
       });
     }
 
+    // 2. Запрашиваем данные из базы
     try {
-      const player = await getPlayerDescription(requestedUsername, auth, SPREADSHEET_ID);
+      const player = await getPlayerDescription(requestedUsername || actorId.toString());
 
       if (!player) {
         return bot.sendMessage(chatId, `❌ Описание для ${requestedUsername} не найдено.`, {
@@ -47,7 +45,9 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       bot.sendMessage(chatId, response, {
         reply_to_message_id: msg.message_id,
       });
+
     } catch (error) {
+      console.error('Ошибка при получении описания из базы:', error);
       bot.sendMessage(chatId, '❌ Произошла ошибка при получении описания.', {
         reply_to_message_id: msg.message_id,
       });

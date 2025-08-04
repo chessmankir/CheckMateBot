@@ -31,19 +31,19 @@ const auth = new google.auth.GoogleAuth({
 });
 
 const testConnection = require('./handlers/dbconnection');
-
 // const memberHandlers = require('./handlers/memberHandlers');
 require('./handlers/memberHandlers')(bot, notifyChatId, threadMessageId);
 require('./handlers/inviteGenerator')(bot); // ← генератор инвайтов
+
 require('./handlers/clanJoinBot')(bot, notifyChatId, inviteLink1, inviteLink2);
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
 require('./handlers/getClanList')(bot, auth, SPREADSHEET_ID);
+require('./handlers/copyMembersToDb')(bot, auth, SPREADSHEET_ID);
 require('./handlers/findMember')(bot, auth, SPREADSHEET_ID);
 const handleChannelForward = require('./handlers/channelForward');
 handleChannelForward(bot, '@rabotaunaotebis', process.env.ADMIN_CHAT);
 const keepAlive = require('./keepAlive'); // ← подключаем сервер
-
 // 🟢 Запускаем HTTP-сервер (не даст Replit заснуть)
 keepAlive();
 const getUserInfo = require('./handlers/getUserInfo');

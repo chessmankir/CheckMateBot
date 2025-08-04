@@ -1,30 +1,19 @@
-const SHEET_NAME = 'Clan'; // проверь, как у тебя назван лист
+const db = require('./db');
+const isAllowedChat = require('../admin/permissionChats');
 
 const clanLimits = {
   1: 50,
   2: 55,
   3: 60
 };
-const isAllowedChat = require('./../admin/permissionChats');
 
-async function getSheetData(auth, SPREADSHEET_ID) {
-   const { google, displayvideo_v1beta } = require('googleapis');
-   const sheets = google.sheets({ version: 'v4', auth });
+module.exports = function (bot) {
 
-   const response = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range: `${SHEET_NAME}!A2:G`, // A — actor_id, B — username, G — clan
-  });
-
-  return response.data.values || [];
-}
-
-module.exports = function (bot, auth, SPREADSHEET_ID) {
-  // !списокN
+  // !списокN — участников определённого клана
   bot.onText(/!список(\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAllowedChat(chatId)) return;
     const clanNumber = parseInt(match[1]);
+    if (!isAllowedChat(chatId)) return;
 
     if (!clanLimits[clanNumber]) {
       return bot.sendMessage(chatId, '❌ Неверный номер клана.', {
@@ -33,51 +22,59 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     }
 
     try {
-      const rows = await getSheetData(auth, SPREADSHEET_ID);
-      const members = rows.filter(row => row[6]?.toString() === clanNumber.toString());
+      const res = await db.query(
+        'SELECT telegram_tag FROM clan_members WHERE clan = $1 ORDER BY telegram_tag',
+        [clanNumber]
+      );
 
-      if (members.length === 0) {
+      if (res.rows.length === 0) {
         return bot.sendMessage(chatId, `❗️В клане ${clanNumber} пока нет участников.`, {
           reply_to_message_id: msg.message_id
         });
       }
-      const lines = members.map((m, i) => `${i + 1}. ${m[2] || '(без тега)'}`);
-      const clanLimit = clanLimits[clanNumber];
-      const message = `Список участников клана Checkmate ${clanNumber} — ${members.length}/${clanLimit}:\n\n${lines.join('\n')}`;
+
+      const members = res.rows;
+      const lines = members.map((m, i) => `${i + 1}. ${m.telegram_tag || '(без тега)'}`);
+      const message = `Список участников клана Checkmate ${clanNumber} — ${members.length}/${clanLimits[clanNumber]}:\n\n${lines.join('\n')}`;
 
       bot.sendMessage(chatId, message, { reply_to_message_id: msg.message_id });
 
     } catch (err) {
-      console.error('Ошибка при получении списка:', err);
+      console.error('❌ Ошибка при получении списка клана:', err);
       bot.sendMessage(chatId, '❌ Ошибка при получении списка.', { reply_to_message_id: msg.message_id });
     }
   });
 
-  // !полныйсписок
+  // !полныйсписок — всех участников
   bot.onText(/!полныйсписок/, async (msg) => {
     const chatId = msg.chat.id;
+    if (!isAllowedChat(chatId)) return;
 
     try {
-      const rows = await getSheetData();
+      const res = await db.query(
+        'SELECT telegram_tag, clan FROM clan_members ORDER BY clan, telegram_tag'
+      );
 
-      if (rows.length === 0) {
+      if (res.rows.length === 0) {
         return bot.sendMessage(chatId, '❗️Список участников пуст.', {
           reply_to_message_id: msg.message_id
         });
       }
 
-      const lines = rows.map((row, index) => {
-        const username = row[2] || '(без тега)';
-        const clan = row[6] || '—';
-        return `${index + 1}. ${username} — клан ${clan}`;
+      const lines = res.rows.map((row, index) => {
+        const tag = row.telegram_tag || '(без тега)';
+        const clan = row.clan || '—';
+        return `${index + 1}. ${tag} — клан ${clan}`;
       });
 
       const message = `Полный список участников:\n\n${lines.join('\n')}`;
       bot.sendMessage(chatId, message, { reply_to_message_id: msg.message_id });
 
     } catch (err) {
-      console.error('Ошибка при получении полного списка:', err);
-      bot.sendMessage(chatId, '❌ Ошибка при получении полного списка.', { reply_to_message_id: msg.message_id });
+      console.error('❌ Ошибка при получении полного списка:', err);
+      bot.sendMessage(chatId, '❌ Ошибка при получении полного списка.', {
+        reply_to_message_id: msg.message_id
+      });
     }
   });
 };

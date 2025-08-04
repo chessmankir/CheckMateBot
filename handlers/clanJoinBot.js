@@ -1,20 +1,8 @@
 const db = require('./db');
 const fs = require('fs');
-// const saveDescription = require('./saveDescriptionFunc');
-// const isAllowedChat = require('../admin/permissionChats');
-// const saveMemberDb = require('./saveMemberDb');
-
-await saveOrUpdateMember({
-  name: 'Кирилл',
-  nickname: 'ChessmanKir',
-  telegram_tag: '@chessmanKir',
-  age: '19',
-  pubg_id: 51984492416,
-  city: 'Берлин',
-  clan: 1,
-  actor_id: 123456789
-});
-
+const saveDescription = require('./saveDescriptionFunc');
+const isAllowedChat = require('../admin/permissionChats');
+const saveMemberDb = require('./saveMemberDb');
 
 const usersInProcess = new Map();
 
@@ -124,7 +112,7 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
       user.step = 'age';
       return bot.sendMessage(chatId, 'Сколько тебе лет?');
     }
-    
+
     // Шаг 4 — возраст
     if (user.step === 'age') {
       user.data.age = text;
@@ -153,7 +141,7 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
         await db.query('UPDATE invites SET is_active = false WHERE invite_code = $1', [
           user.data.inviteCode
         ]);
-       // await saveMemberDb(dataToSave);
+        await saveMemberDb(dataToSave);
 
         await bot.sendMessage(chatId, '🎉 Ты принят в клан! Добро пожаловать в клан CheckMate♟️'); 
         console.log(dataToSave.clan);

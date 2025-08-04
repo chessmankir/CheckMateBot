@@ -1,54 +1,52 @@
-const SHEET_NAME = 'Clan';
-const isAllowedChat = require('./../admin/permissionChats');
+const db = require('../handlers/db'); // путь к подключению к базе
+const isAllowedChat = require('../admin/permissionChats');
 
-async function getSheetData(auth, SPREADSHEET_ID) {
-  const { google, displayvideo_v1beta } = require('googleapis');
-  const sheets = google.sheets({ version: 'v4', auth });
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range: `${SHEET_NAME}!A2:G`,
-  });
-
-  return response.data.values || [];
-}
-
-module.exports = function (bot,  auth, SPREADSHEET_ID) {
+module.exports = function (bot) {
   bot.onText(/!поиск\s+(.+)/i, async (msg, match) => {
     const chatId = msg.chat.id;
     if (!isAllowedChat(chatId)) return;
+
     const query = match[1].trim().toLowerCase();
 
     try {
-      const rows = await getSheetData(auth, SPREADSHEET_ID);
+      const res = await db.query(
+        `SELECT * FROM clan_members 
+         WHERE LOWER(telegram_tag) = $1 
+         OR CAST(pubg_id AS TEXT) = $1 
+         OR LOWER(nickname) = $1
+         LIMIT 1`,
+        [query]
+      );
 
-      let row = rows.find(r => (r[1] || '').toLowerCase() === query); // username
-      if (!row) row = rows.find(r => (r[3] || '').toLowerCase() === query); // pubg_id
-      if (!row) row = rows.find(r => (r[2] || '').toLowerCase() === query); // name
-
-      if (!row) {
+      if (res.rows.length === 0) {
         return bot.sendMessage(chatId, `❌ Участник по запросу "${query}" не найден.`, {
           reply_to_message_id: msg.message_id
         });
       }
-      
-      const name = row[0] || '(нет тега)';
-      const nick = row[1] || '(нет имени)';
-      const tag = row[2] || ' нет тега'
-      const pubgId = row[3] || '(нет PUBG ID)';
-      const age = row[4] || '(возраст не указан)';
-      const city = row[5] || '(город не указан)';
-      const clan = row[6] || '(клан не указан)';
 
-      const message = `📄 Найден участник: ${tag}\n\n👤 Имя: ${name}\n🧾 Ник: ${nick}\n🆔 PUBG ID: ${pubgId}\n📅 Возраст: ${age}\n📍 Город: ${city}\n🏰 Клан: ${clan}`;
+      const user = res.rows[0];
+
+      const message = `
+📄 Найден участник: ${user.telegram_tag || '(нет тега)'}
+
+👤 Имя: ${user.name || '(нет имени)'}
+🧾 Ник: ${user.nickname || '(нет ника)'}
+🆔 PUBG ID: ${user.pubg_id || '(нет PUBG ID)'}
+📅 Возраст: ${user.age || '(не указан)'}
+📍 Город: ${user.city || '(не указан)'}
+🏰 Клан: ${user.clan || '(не указан)'}
+      `.trim();
+
       bot.sendMessage(chatId, message, {
         reply_to_message_id: msg.message_id
       });
 
     } catch (err) {
-      console.error('Ошибка при поиске участника:', err);
-      bot.sendMessage(chatId, '❌ Ошибка при поиске участника.', {
+      console.error('❌ Ошибка при поиске в базе:', err);
+      bot.sendMessage(chatId, '❌ Произошла ошибка при поиске участника.', {
         reply_to_message_id: msg.message_id
       });
     }
   });
 };
+
