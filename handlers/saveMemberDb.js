@@ -55,8 +55,8 @@ async function saveMemberDb(data) {
     // 3. Если не найдено — создаём нового
     await client.query(
       `INSERT INTO clan_members 
-        (name, nickname, telegram_tag, age, pubg_id, city, clan, created_at, actor_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        (name, nickname, telegram_tag, age, pubg_id, city, clan, created_at, actor_id, active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)`,
       [name, nick, target_username, age, pubg_id, city, clan, now, actor_id]
     );
 
