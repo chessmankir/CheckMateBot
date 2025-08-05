@@ -133,7 +133,7 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
         city: user.data.city,
         clan: user.data.clan,
         actor_id: userId,
-        date: new Date().toISOString(),
+        date: 0,
       };
 
       try {

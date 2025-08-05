@@ -26,7 +26,7 @@ module.exports = function (bot) {
       city: lines[4],
       clan: lines[5],
       actor_id: '',
-      date: null,
+      date: 0,
     };
     console.log(data);
     await saveMemberDb(data);
