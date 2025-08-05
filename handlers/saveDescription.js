@@ -25,7 +25,7 @@ module.exports = function (bot) {
       age: lines[3],
       city: lines[4],
       clan: lines[5],
-      actor_id: '',
+      actor_id: null,
       date: 0,
     };
     console.log(data);
