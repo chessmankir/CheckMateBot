@@ -1,19 +1,17 @@
 const { google } = require('googleapis');
-const db = require('../db');
+const db = require('./db');
 const isAdminChat = require('../admin/permissionAdminChat');
 
 const SHEET_NAME = 'Clan';
 
 const ALLOWED_CHAT_IDS = [
-  -1002303001603, // ID первого 
-  -1002549710535, // ID второго чата
-  -1002833167359  // ID третьего чата
+  -1002549710535, // ID превого чата
+  -1002833167359  // ID второго чата
 ];
 
 module.exports = function (bot, auth, SPREADSHEET_ID) {
   bot.onText(/^!бан1\s+@(\S+)/, async (msg, match) => {
     const chatId = msg.chat.id;
-    console.log(chatId);
     const username = `@${match[1]}`;
 
     if (!isAdminChat(chatId)) return;
@@ -21,7 +19,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     try {
       // Получаем пользователя из базы по username
       const res = await db.query(
-        `SELECT actor_id FROM clan_members WHERE telegram_tag = $1 LIMIT 1`,
+        `SELECT actor_id, clan FROM clan_members WHERE telegram_tag = $1 LIMIT 1`,
         [username]
       );
 
@@ -32,12 +30,9 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       }
 
       const actorId = res.rows[0].actor_id;
-      console.log(actorId);
-      console.log(res.rows[0]);
-      console.log(res.rows[0].clan);
-      return;
+      const targetChatId = res.rows[0].clan === 3 ? ALLOWED_CHAT_IDS[1] : ALLOWED_CHAT_IDS[0];
 
-      await bot.banChatMember(chatId, actorId); // банит
+      await bot.banChatMember(targetChatId, actorId); // банит
 
       // 1. Обновляем статус в базе
       await db.query(
@@ -76,11 +71,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
         });
       }
 
-      // 3. Удаляем и баним участника в Telegram-чате
-      await bot.banChatMember(chatId, actorId); // банит
-      //await bot.unbanChatMember(chatId, actorId); // мгновенно разбанивает, чтобы можно было добавить снова вручную при необходимости
-
-      bot.sendMessage(chatId, `🚫 ${username} был забанен, удалён из базы, таблицы и чата.`, {
+      bot.sendMessage(chatId, `🚫 ${username} был забанен`, {
         reply_to_message_id: msg.message_id,
       });
 
