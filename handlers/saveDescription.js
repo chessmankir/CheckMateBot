@@ -2,10 +2,17 @@ const saveDescription = require('./saveDescriptionFunc');
 const isAdminChat = require('./../admin/permissionAdminChat');
 const saveMemberDb = require('./saveMemberDb');
 
+const admins = [
+  '@nurka7',
+  '@chessmankir',
+  '@wimepubgm'
+];
+
 // 📬 Обработчик команды "+описание1 @ник"
 module.exports = function (bot) {
   bot.onText(/^\+описание1\s+@(\S+)\n(.+)/s, async (msg, match) => {
     const chatId = msg.chat.id;
+    console.log('chat');
     if (!isAdminChat(chatId)) return;
     const from = msg.from;
     const target_username = `@${match[1]}`;

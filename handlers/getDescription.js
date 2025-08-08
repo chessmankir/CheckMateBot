@@ -1,12 +1,9 @@
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const isAllowedChat = require('./../admin/permissionChats');
-console.log('description');
 module.exports = function (bot) {
   bot.onText(/^!описание(?:\s+@(\S+))?/, async (msg, match) => {
     const chatId = msg.chat.id;
-    console.log('description');
     if (!isAllowedChat(chatId)) return;
-    console.log('permisson');
     // 1. Получаем тег или actor_id
     const requestedUsername = match[1]
       ? `@${match[1]}`

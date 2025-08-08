@@ -42,6 +42,8 @@ require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
 require('./handlers/getClanList')(bot, auth, SPREADSHEET_ID);
 require('./handlers/copyMembersToDb')(bot, auth, SPREADSHEET_ID);
 require('./handlers/findMember')(bot, auth, SPREADSHEET_ID);
+require('./handlers/ruleClan')(bot, auth, SPREADSHEET_ID);
+require('./handlers/afterJoinMember')(bot, auth, SPREADSHEET_ID);
 const handleChannelForward = require('./handlers/channelForward');
 handleChannelForward(bot, '@rabotaunaotebis', process.env.ADMIN_CHAT);
 const keepAlive = require('./keepAlive'); // ← подключаем сервер
