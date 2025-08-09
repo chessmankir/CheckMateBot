@@ -31,6 +31,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
 
       const actorId = res.rows[0].actor_id;
       const targetChatId = res.rows[0].clan === 3 ? ALLOWED_CHAT_IDS[1] : ALLOWED_CHAT_IDS[0];
+      const clan = read.rows[0].clan;
 
       await bot.banChatMember(targetChatId, actorId); // банит
 
@@ -46,7 +47,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
 
       const sheetRes = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A2:G`,
+        range: `${SHEET_NAME + clan}!A2:G`,
       });
 
       const rows = sheetRes.data.values || [];

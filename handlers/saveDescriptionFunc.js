@@ -26,7 +26,7 @@ async function saveDescription(data) {
   try {
     const getRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: SHEET_NAME,
+      range: SHEET_NAME + data.clan
     });
 
     const rows = getRes.data.values || [];
@@ -55,7 +55,7 @@ async function saveDescription(data) {
     if (foundRowIndex !== -1) {
       await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A${foundRowIndex}:I${foundRowIndex}`,
+        range: `${SHEET_NAME + data.clan}!A${foundRowIndex}:I${foundRowIndex}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
           values: [newRow],
@@ -64,7 +64,7 @@ async function saveDescription(data) {
     } else {
       await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
-        range: SHEET_NAME,
+        range: SHEET_NAME + data.clan,
         valueInputOption: 'USER_ENTERED',
         insertDataOption: 'INSERT_ROWS',
         requestBody: {
