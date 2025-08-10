@@ -23,7 +23,7 @@ module.exports = function (bot) {
 
     try {
       const res = await db.query(
-        'SELECT telegram_tag FROM clan_members WHERE clan = $1 ORDER BY telegram_tag',
+        'SELECT telegram_tag FROM clan_members WHERE clan = $1 AND active = TRUE ORDER BY telegram_tag',
         [clanNumber]
       );
 
@@ -52,7 +52,7 @@ module.exports = function (bot) {
 
     try {
       const res = await db.query(
-        'SELECT telegram_tag, clan FROM clan_members ORDER BY clan, telegram_tag'
+        'SELECT telegram_tag, clan FROM clan_members WHERE active = TRUE ORDER BY clan, telegram_tag'
       );
 
       if (res.rows.length === 0) {
