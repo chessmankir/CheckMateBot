@@ -48,7 +48,7 @@ require('./handlers/synthSheet')(bot, auth, SPREADSHEET_ID);
 require('./handlers/saveActorIdbyMessage')(bot, auth, SPREADSHEET_ID);
 const handleChannelForward = require('./handlers/channelForward');
 handleChannelForward(bot, '@rabotaunaotebis', process.env.ADMIN_CHAT);
-const keepAlive = require('./keepAlive2'); // ← подключаем сервер
+const keepAlive = require('./keepAlive'); // ← подключаем сервер
 // 🟢 Запускаем HTTP-сервер (не даст Replit заснуть)
 keepAlive();
 const getUserInfo = require('./handlers/getUserInfo');
