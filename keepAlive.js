@@ -1,14 +1,19 @@
+// keepAlive.js
 const express = require('express');
 
 function keepAlive() {
   const app = express();
-  const PORT = process.env.PORT || 3001;
 
-  app.get('/', (req, res) => {
-    res.send('🤖 Бот активен! Replit не засыпает.');
+  // На Timeweb PORT задаётся автоматически — берём его без запасного варианта
+  const PORT = process.env.PORT;
+
+  // Простой healthcheck-эндпоинт
+  app.get('/', (_req, res) => {
+    res.send('🤖 Бот активен!');
   });
 
-  app.listen(PORT, () => {
+  // Слушаем на всех интерфейсах, чтобы Timeweb увидел порт
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`🌐 HTTP-сервер работает на порту ${PORT}`);
   });
 }

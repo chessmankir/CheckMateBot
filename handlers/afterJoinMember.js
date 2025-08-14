@@ -4,7 +4,8 @@ const getPlayerDescription = require('./../db/getDescriptionDb');
 const admins = [
   '@nurka7',
   '@chessmankir',
-  '@winepubgm'
+  '@winepubgm',
+  '@eric_burgundy'
 ]
 
 module.exports = function (bot) {
@@ -28,7 +29,7 @@ module.exports = function (bot) {
 
         const clan = memberRes.rows[0].clan;
 
-        if (clan > 3 || clan < 0){
+        if (clan > 4 || clan < 0){
           return;
         }
         console.log(clan);
