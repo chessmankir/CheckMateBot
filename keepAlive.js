@@ -4,17 +4,15 @@ const express = require('express');
 function keepAlive() {
   const app = express();
 
-  // На Timeweb PORT задаётся автоматически — берём его без запасного варианта
-  const PORT = process.env.PORT;
+  // На Timeweb иногда PORT не прокидывают в Dockerfile-режиме.
+  // Поэтому слушаем process.env.PORT ИЛИ 8080 (самый ожидаемый порт платформой).
+  const PORT = Number(process.env.PORT || 8080);
 
-  // Простой healthcheck-эндпоинт
-  app.get('/', (_req, res) => {
-    res.send('🤖 Бот активен!');
-  });
+  app.get('/', (_req, res) => res.status(200).send('✅ Bot is alive'));
+  app.get('/health', (_req, res) => res.send('ok'));
 
-  // Слушаем на всех интерфейсах, чтобы Timeweb увидел порт
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🌐 HTTP-сервер работает на порту ${PORT}`);
+    console.log(`✅ HTTP healthcheck listening on ${PORT} (0.0.0.0)`);
   });
 }
 
