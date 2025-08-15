@@ -1,5 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { notifyChatId, threadMessageId, inviteLink1, inviteLink2 } = require('./config');
+// test web
 
 require('dotenv').config(); // Загружает переменные из .env
 const token = process.env.TELEGRAM_TOKEN;
