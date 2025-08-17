@@ -24,7 +24,12 @@ module.exports = function(bot) {
         [uuidv4(), inviteCode, true, clanNumber]
       );
 
-      bot.sendMessage(msg.chat.id, `🎟️ Инвайт-код для клана №${clanNumber}:\n<code>${inviteCode}</code>`, {
+      bot.sendMessage(msg.chat.id, `🎟️ Инвайт-код для клана №${clanNumber}:`, {
+        parse_mode: 'HTML',
+        reply_to_message_id: msg.message_id,
+      });
+      
+      bot.sendMessage(msg.chat.id, `<code>${inviteCode}</code>`, {
         parse_mode: 'HTML',
         reply_to_message_id: msg.message_id,
       });
