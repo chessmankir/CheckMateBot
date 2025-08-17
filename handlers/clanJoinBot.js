@@ -144,15 +144,7 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
         await saveMemberDb(dataToSave);
 
         await bot.sendMessage(chatId, '🎉 Ты принят в клан! Добро пожаловать в клан CheckMate♟️'); 
-        console.log(dataToSave.clan);
-        if (dataToSave.clan == 1 || dataToSave.clan == 2){
-          console.log('первый чат');
-          await bot.sendMessage(chatId, inviteLink1 );
-        }
-        else{
-          console.log('второй чат');
-          await bot.sendMessage(chatId, inviteLink2 );
-        }
+        
         if (dataToSave.clan == 1 || dataToSave.clan == 2){
           await bot.sendMessage(chatId, inviteLink1 );
         }

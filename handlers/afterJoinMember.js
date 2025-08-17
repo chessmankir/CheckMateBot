@@ -33,6 +33,7 @@ module.exports = function (bot) {
           return;
         }
         const admin  =  await getPlayerDescription(admins[clan - 1]);
+        console.log(admin);
         if ( admin == null){
           return;
         }
@@ -60,9 +61,9 @@ module.exports = function (bot) {
  🎂 Возраст: ${admin.age}
  📍 Город: ${admin.city}
               `.trim();
-              bot.sendMessage(actorId, response, {
+             bot.sendMessage(actorId, response, {
                 parse_mode: 'Markdown',
-              });
+              }); 
 
       } catch (error) {
         console.error('❌ Ошибка при обработке нового участника:', error);

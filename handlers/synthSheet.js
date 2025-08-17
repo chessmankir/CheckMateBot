@@ -7,6 +7,7 @@ const CLAN_SHEETS = {
   1: 'Clan1',
   2: 'Clan2',
   3: 'Clan3',
+  4: 'Clan4'
 };
 
 // какие колонки пишем в лист
