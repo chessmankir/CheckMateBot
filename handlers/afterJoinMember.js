@@ -4,7 +4,7 @@ const getPlayerDescription = require('./../db/getDescriptionDb');
 const admins = [
   '@nurka7',
   '@chessmankir',
-  '@winepubgm',
+  '@winepubg',
   '@eric_burgundy'
 ]
 
@@ -32,10 +32,7 @@ module.exports = function (bot) {
         if (clan > 4 || clan < 0){
           return;
         }
-        console.log(clan);
         const admin  =  await getPlayerDescription(admins[clan - 1]);
-        console.log(admins[clan - 1]);
-        console.log(admin);
         if ( admin == null){
           return;
         }
