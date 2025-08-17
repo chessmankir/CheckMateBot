@@ -3,6 +3,7 @@ const isAllowedChat = require('./../admin/permissionChats');
 module.exports = function (bot) {
   bot.onText(/^!описание(?:\s+@(\S+))?/, async (msg, match) => {
     const chatId = msg.chat.id;
+    console.log(chatId);
     if (!isAllowedChat(chatId)) return;
     // 1. Получаем тег или actor_id
     const requestedUsername = match[1]

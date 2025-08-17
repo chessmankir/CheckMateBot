@@ -3,7 +3,7 @@ const { notifyChatId, threadMessageId, inviteLink1, inviteLink2 } = require('./c
 // test web
 
 require('dotenv').config(); // Загружает переменные из .env
-const token = process.env.TELEGRAM_TOKEN;
+const token = process.env.TELEGRAM_TOKEN2;
 const bot = new TelegramBot(token, { polling: true });
 // Обработка ошибок polling
 bot.on('polling_error', (error) => {
@@ -46,6 +46,8 @@ require('./handlers/findMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/ruleClan')(bot, auth, SPREADSHEET_ID);
 require('./handlers/afterJoinMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/synthSheet')(bot, auth, SPREADSHEET_ID);
+require('./update/updateClan')(bot, auth, SPREADSHEET_ID);
+require('./update/setNick')(bot, auth, SPREADSHEET_ID);
 require('./handlers/saveActorIdbyMessage')(bot, auth, SPREADSHEET_ID);
 const handleChannelForward = require('./handlers/channelForward');
 handleChannelForward(bot, '@rabotaunaotebis', process.env.ADMIN_CHAT);

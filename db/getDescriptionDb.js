@@ -3,6 +3,7 @@ const db = require('../handlers/db'); // подключение к базе
 
 module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId) {
   try {
+    console.log(telegramTagOrActorId);
     const res = await db.query(
       `SELECT * FROM clan_members 
        WHERE LOWER(telegram_tag) = LOWER($1) OR actor_id::text = $1
@@ -18,7 +19,8 @@ module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId)
       nick: row.nickname,
       pubgId: row.pubg_id,
       age: row.age,
-      city: row.city
+      city: row.city,
+      clan: row.clan
     };
   } catch (err) {
     console.error('Ошибка при запросе из базы:', err);
