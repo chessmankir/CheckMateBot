@@ -3,7 +3,7 @@ const { notifyChatId, threadMessageId, inviteLink1, inviteLink2 } = require('./c
 // test web
 
 require('dotenv').config(); // Загружает переменные из .env
-const token = process.env.TELEGRAM_TOKEN;
+const token = process.env.TELEGRAM_TOKEN2;
 const bot = new TelegramBot(token, { polling: true });
 // Обработка ошибок polling
 bot.on('polling_error', (error) => {
@@ -23,6 +23,7 @@ const path = require('path');
 
 const SPREADSHEET_ID = '11BRhGaUWPd7dg_lPBHng0mXlpNJcPyRUkPuwSAQOx78';
 const SHEET_NAME = 'Clan';
+
 
 const credentials = JSON.parse(process.env.GOOGLE_SERVICE_JSON);
 
@@ -49,6 +50,8 @@ require('./handlers/synthSheet')(bot, auth, SPREADSHEET_ID);
 require('./update/updateClan')(bot, auth, SPREADSHEET_ID);
 require('./update/setNick')(bot, auth, SPREADSHEET_ID);
 require('./handlers/saveActorIdbyMessage')(bot, auth, SPREADSHEET_ID);
+const testData = require('./handlers/testData');
+// testData();
 const handleChannelForward = require('./handlers/channelForward');
 handleChannelForward(bot, '@rabotaunaotebis', process.env.ADMIN_CHAT);
 const keepAlive = require('./keepAlive'); // ← подключаем сервер
