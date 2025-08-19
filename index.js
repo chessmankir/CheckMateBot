@@ -50,6 +50,7 @@ require('./handlers/synthSheet')(bot, auth, SPREADSHEET_ID);
 require('./update/updateClan')(bot, auth, SPREADSHEET_ID);
 require('./update/setNick')(bot, auth, SPREADSHEET_ID);
 require('./handlers/saveActorIdbyMessage')(bot, auth, SPREADSHEET_ID);
+require('./handlers/getTelegramInfo')(bot)
 const testData = require('./handlers/testData');
 // testData();
 const handleChannelForward = require('./handlers/channelForward');
