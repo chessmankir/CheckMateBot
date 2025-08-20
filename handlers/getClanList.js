@@ -4,7 +4,8 @@ const isAllowedChat = require('../admin/permissionChats');
 const clanLimits = {
   1: 50,
   2: 55,
-  3: 60
+  3: 60,
+  4: 35 
 };
 
 module.exports = function (bot) {
