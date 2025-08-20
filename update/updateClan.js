@@ -63,11 +63,11 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
         const sheetName = `Clan${i}`;
         const sheetId = await getSheetIdByName(sheets, SPREADSHEET_ID, sheetName);
         if (!sheetId) continue;
-
+        console.log(i);
         const sheetData = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: sheetName });
         const rows = sheetData.data.values || [];
-        const rowIndex = rows.findIndex(r => r[2] === targetUser);
-
+        const rowIndex = rows.findIndex(r => r[2].toLowerCase() === targetUser);
+        console.log(rowIndex);
         if (rowIndex !== -1) {
           await sheets.spreadsheets.batchUpdate({
             spreadsheetId: SPREADSHEET_ID,
