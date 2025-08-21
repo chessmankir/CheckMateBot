@@ -14,7 +14,7 @@ module.exports = function (bot) {
   bot.onText(/!список(\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const clanNumber = parseInt(match[1]);
-    if (!isAllowedChat(chatId)) return;
+    // if (!isAllowedChat(chatId)) return;
 
     if (!clanLimits[clanNumber]) {
       return bot.sendMessage(chatId, '❌ Неверный номер клана.', {
@@ -24,7 +24,7 @@ module.exports = function (bot) {
 
     try {
       const res = await db.query(
-        'SELECT telegram_tag FROM clan_members WHERE clan = $1 AND active = TRUE ORDER BY telegram_tag',
+        'SELECT telegram_tag, nickname  FROM clan_members WHERE clan = $1 AND active = TRUE ORDER BY telegram_tag',
         [clanNumber]
       );
 
@@ -35,7 +35,10 @@ module.exports = function (bot) {
       }
 
       const members = res.rows;
-      const lines = members.map((m, i) => `${i + 1}. ${m.telegram_tag || '(без тега)'}`);
+      const lines = members.map(
+        (m, i) =>
+          `${i + 1}. ${m.telegram_tag || '(без тега)'} — ${m.nickname || '(без ника)'}`
+      );
       const message = `Список участников клана Checkmate ${clanNumber} — ${members.length}/${clanLimits[clanNumber]}:\n\n${lines.join('\n')}`;
 
       bot.sendMessage(chatId, message, { reply_to_message_id: msg.message_id });
