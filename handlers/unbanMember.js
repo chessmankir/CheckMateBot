@@ -12,12 +12,12 @@ module.exports = function (bot) {
     console.log('разюан');
     if (!isAllowedChat(chatId)) return;
     console.log('allowed');
-    const tag = `@${match[1]}`;
+    const tag = `@${match[1]}`.toLowerCase();
 
     try {
       // Ищем участника по @тегу
       const res = await db.query(
-        'SELECT * FROM clan_members WHERE telegram_tag = $1',
+        'SELECT * FROM clan_members WHERE lower(telegram_tag) = $1',
         [tag]
       );
 
@@ -27,10 +27,10 @@ module.exports = function (bot) {
 
       const member = res.rows[0];
 
-      const targetChatId = res.rows[0].clan === 3 ? ALLOWED_CHAT_IDS[1] : ALLOWED_CHAT_IDS[0];
+      const targetChatId = (res.rows[0].clan === 3 || res.rows[0].clan === 4)? ALLOWED_CHAT_IDS[1] : ALLOWED_CHAT_IDS[0];
       // Обновляем в базе
       await db.query(
-        'UPDATE clan_members SET active = TRUE WHERE telegram_tag = $1',
+        'UPDATE clan_members SET active = TRUE WHERE lower(telegram_tag) = $1',
         [tag]
       );
 

@@ -4,6 +4,7 @@ module.exports = function (bot, FROM_CHANNEL_ID, TO_CHAT_ID) {
       const messageId = msg.message_id;
       await bot.forwardMessage(TO_CHAT_ID, FROM_CHANNEL_ID, messageId);
     } catch (error) {
+      //console.log(TO_CHAT_ID);
       console.error('Ошибка при форварде сообщения:', error);
     }
   });

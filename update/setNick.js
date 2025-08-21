@@ -49,10 +49,10 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     }
 
     const player  = await getPlayerDescription(targetTag);
-    try {
+    try { 
       // --- Обновляем в PostgreSQL ---
       await pool.query(
-        `UPDATE clan_members SET nickname = $1 WHERE lower(telegram_tag) = lower($2)`,
+       `UPDATE clan_members SET nickname = $1 WHERE lower(telegram_tag) = lower($2)`,
         [newNickname, targetTag]
       );
 

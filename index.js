@@ -34,11 +34,14 @@ const auth = new google.auth.GoogleAuth({
 
 const testConnection = require('./handlers/dbconnection');
 // const memberHandlers = require('./handlers/memberHandlers');
+
+
 require('./handlers/memberHandlers')(bot, notifyChatId, threadMessageId);
 require('./handlers/inviteGenerator')(bot); // ← генератор инвайтов
 require('./handlers/banMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/unbanMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/clanJoinBot')(bot, notifyChatId, inviteLink1, inviteLink2);
+
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
 require('./handlers/getClanList')(bot, auth, SPREADSHEET_ID);
@@ -46,17 +49,19 @@ require('./handlers/copyMembersToDb')(bot, auth, SPREADSHEET_ID);
 require('./handlers/findMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/ruleClan')(bot, auth, SPREADSHEET_ID);
 require('./handlers/afterJoinMember')(bot, auth, SPREADSHEET_ID);
+
 require('./handlers/synthSheet')(bot, auth, SPREADSHEET_ID);
 require('./update/updateClan')(bot, auth, SPREADSHEET_ID);
 require('./update/setNick')(bot, auth, SPREADSHEET_ID);
 require('./handlers/saveActorIdbyMessage')(bot, auth, SPREADSHEET_ID);
 require('./handlers/getTelegramInfo')(bot)
 const testData = require('./handlers/testData');
-// testData();
-const handleChannelForward = require('./handlers/channelForward');
-handleChannelForward(bot, '@rabotaunaotebis', process.env.ADMIN_CHAT);
+// testData(bot);
+const handleChannelForward = require('./handlers/channelForward'); handleChannelForward(bot, '@winepubgm', "-1002549710535"); 
+handleChannelForward(bot, '@winepubgm', "-1002833167359");
 const keepAlive = require('./keepAlive'); // ← подключаем сервер
 // 🟢 Запускаем HTTP-сервер (не даст Replit заснуть)
-keepAlive();
+
 const getUserInfo = require('./handlers/getUserInfo');
 bot.on('message', (msg) => getUserInfo(bot, msg, token));
+keepAlive();
