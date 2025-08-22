@@ -4,7 +4,13 @@ const { notifyChatId, threadMessageId, inviteLink1, inviteLink2 } = require('./c
 
 require('dotenv').config(); // Загружает переменные из .env
 const token = process.env.TELEGRAM_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, {
+  polling: {
+    params: {
+      allowed_updates: ['message', 'chat_member', 'my_chat_member']
+    }
+  }
+});
 // Обработка ошибок polling
 bot.on('polling_error', (error) => {
   console.log('Детали ошибки polling:', error.code, error.message);
