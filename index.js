@@ -47,6 +47,7 @@ require('./handlers/inviteGenerator')(bot); // ← генератор инвай
 require('./handlers/banMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/unbanMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/clanJoinBot')(bot, notifyChatId, inviteLink1, inviteLink2);
+require('./handlers/getBanList')(bot);
 
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
