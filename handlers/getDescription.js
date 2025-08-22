@@ -1,11 +1,20 @@
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const isAllowedChat = require('./../admin/permissionChats');
 
+function escapeMarkdown(text) {
+  if (!text) return '—';
+  return text
+    .replace(/_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/`/g, '\\`')
+    .replace(/\[/g, '\\[');
+}
+
 module.exports = function (bot) {
   // реагирует на "!описание", "!Описание", "!ОПИСАНИЕ" и т.п.
   bot.onText(/^!описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAllowedChat(chatId)) return;
+   // if (!isAllowedChat(chatId)) return;
 
     try {
       // 1) Явно указанный @ в команде
@@ -33,10 +42,11 @@ module.exports = function (bot) {
           { reply_to_message_id: msg.message_id, parse_mode: 'Markdown' }
         );
       }
-
+      console.log(requestedUsername);
       // Ключ для поиска в БД
       const key = requestedUsername || String(actorId);
-      const player = await getPlayerDescription(key);
+      console.log(key);
+       player = await getPlayerDescription(key);
 
       if (!player) {
         return bot.sendMessage(
@@ -49,13 +59,13 @@ module.exports = function (bot) {
       const pubgId = player.pubgId != null ? String(player.pubgId) : '';
 
       const text = `
-🧾 Описание игрока ${requestedUsername || `ID ${actorId}`}:
+🧾 Описание игрока ${escapeMarkdown(requestedUsername)}:
 
-👤 Имя: ${player.name ?? '—'}
-🏷 Ник: ${player.nick ?? '—'}
-🎮 PUBG ID: \`${pubgId || '—'}\`
-🎂 Возраст: ${player.age ?? '—'}
-📍 Город: ${player.city ?? '—'}
+👤 Имя: ${escapeMarkdown(player.name)}
+🏷 Ник: ${escapeMarkdown(player.nick)}
+🎮 PUBG ID: \`${escapeMarkdown(pubgId) || '—'}\`
+🎂 Возраст: ${escapeMarkdown(player.age)}
+📍 Город: ${escapeMarkdown(player.city)}
       `.trim();
 
       await bot.sendMessage(chatId, text, {
