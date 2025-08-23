@@ -51,6 +51,7 @@ require('./handlers/listMarriage')(bot);
 
 require('./handlers/landmate')(bot);
 // require('./scripts/warmupCities');
+require('./handlers/greetings')(bot);
 
 
 require('./handlers/saveDescription')(bot);
