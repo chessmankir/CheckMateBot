@@ -39,8 +39,6 @@ const auth = new google.auth.GoogleAuth({
 });
 
 const testConnection = require('./handlers/dbconnection');
-// const memberHandlers = require('./handlers/memberHandlers');
-
 
 require('./handlers/memberHandlers')(bot, notifyChatId, threadMessageId);
 require('./handlers/inviteGenerator')(bot); // ← генератор инвайтов
@@ -48,6 +46,12 @@ require('./handlers/banMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/unbanMember')(bot, auth, SPREADSHEET_ID);
 require('./handlers/clanJoinBot')(bot, notifyChatId, inviteLink1, inviteLink2);
 require('./handlers/getBanList')(bot);
+require('./handlers/marriage')(bot);
+require('./handlers/listMarriage')(bot);
+
+require('./handlers/landmate')(bot);
+// require('./scripts/warmupCities');
+
 
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
