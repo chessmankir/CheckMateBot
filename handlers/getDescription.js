@@ -1,6 +1,5 @@
 // modules/cmd.description.js
 // helper: реальный ли реплай человеку, а не шапке/боту/каналу
-
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const isAllowedChat = require('./../admin/permissionChats');
 
@@ -13,15 +12,15 @@ function escapeMarkdown(text) {
     .replace(/\[/g, '\\[');
 }
 
-
+// реальный ли реплай пользователю (а не шапке/боту/каналу)
 function isRealUserReply(msg) {
   const r = msg.reply_to_message;
   if (!r) return false;
   if (!r.from || r.from.is_bot) return false;          // не бот
   if (r.is_topic_message || r.forum_topic_created) return false; // шапка/сервиска
-  if (r.sender_chat) return false;                      // ответ на канал/чат, не на юзера
+  if (r.sender_chat) return false;                      // ответ на канал/чат
   if (typeof msg.message_thread_id === 'number' && r.message_id === msg.message_thread_id) {
-    // многие клиенты ставят reply на "шапку" с id == thread_id
+    // многие клиенты ставят reply на «шапку» с id == thread_id
     return false;
   }
   return true;
@@ -30,27 +29,24 @@ function isRealUserReply(msg) {
 module.exports = function (bot) {
   bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
+    // if (!isAllowedChat(chatId)) return;
+
     try {
       const explicitTag = match[1] ? `@${match[1]}` : null;
-      const repliedUser = msg.reply_to_message?.from || null;
       const author = msg.from;
 
-      const realReply = isRealUserReply(msg);
+      let actorId = null;            // ключ №1
+      let requestedUsername = null;  // ключ №2 (если нет actorId)
 
-      let actorId = null;
-      let requestedUsername = null;
-
+      // 1) Явный @ всегда можно указать
       if (explicitTag) {
-        // явный тег — всегда приоритет для поиска по username
         requestedUsername = explicitTag;
-      } else if (realReply) {
-        // реальный ответ пользователю — приоритет actorId адресата
-        actorId = repliedUser.id;
-        requestedUsername = repliedUser.username ? `@${repliedUser.username}` : null;
+      } else if (isRealUserReply(msg)) {
+        // 2) Реальный реплай — берём id адресата
+        actorId = msg.reply_to_message.from.id;
       } else {
-        // нет реплая — берём автора
-        actorId = author.id;
-        requestedUsername = author.username ? `@${author.username}` : null;
+        // 3) Реплая нет — берём автора команды
+        actorId = author?.id ?? null;
       }
 
       if (!requestedUsername && !actorId) {
@@ -61,7 +57,8 @@ module.exports = function (bot) {
         );
       }
 
-      const key = actorId ? String(actorId) : requestedUsername; // приоритет actorId
+      // Ключ поиска: приоритет actorId
+      const key = actorId ? String(actorId) : requestedUsername;
       const player = await getPlayerDescription(key);
 
       if (!player) {
@@ -73,8 +70,11 @@ module.exports = function (bot) {
       }
 
       const pubgId = player.pubgId != null ? String(player.pubgId) : '';
+      // что показывать в заголовке (если искали по ID — показываем ID)
+      const subjectForText = actorId ? `ID ${actorId}` : requestedUsername;
+
       const text = `
-🧾 Описание игрока ${escapeMarkdown(requestedUsername || `ID ${actorId}`)}:
+🧾 Описание игрока ${escapeMarkdown(subjectForText)}:
 
 👤 Имя: ${escapeMarkdown(player.name)}
 🏷 Ник: ${escapeMarkdown(player.nick)}
@@ -100,3 +100,4 @@ module.exports = function (bot) {
     }
   });
 };
+
