@@ -12,9 +12,9 @@ function escapeMarkdown(text) {
 
 module.exports = function (bot) {
   // реагирует на "!описание", "!Описание", "!ОПИСАНИЕ" и т.п.
-  bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
+  bot.onText(/^!описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
-   // if (!isAllowedChat(chatId)) return;
+    // if (!isAllowedChat(chatId)) return;
 
     try {
       // 1) Явно указанный @ в команде
@@ -26,14 +26,16 @@ module.exports = function (bot) {
       // 3) Автор команды
       const author = msg.from;
 
-      // приоритет: @в команде -> reply -> автор
-      const requestedUsername =
-        explicitTag ||
-        (repliedUser?.username ? `@${repliedUser.username}` : null) ||
-        (author?.username ? `@${author.username}` : null);
+      // --- Приоритет: actorId ---
+      const actorId = repliedUser?.id ?? author?.id ?? null;
 
-      // если нет username — будем искать по actor_id (reply -> автор)
-      const actorId = explicitTag ? null : (repliedUser?.id ?? author?.id) || null;
+      // Если actorId нет — fallback на username/explicitTag
+      const requestedUsername =
+        actorId
+          ? null
+          : explicitTag ||
+            (repliedUser?.username ? `@${repliedUser.username}` : null) ||
+            (author?.username ? `@${author.username}` : null);
 
       if (!requestedUsername && !actorId) {
         return bot.sendMessage(
@@ -42,11 +44,14 @@ module.exports = function (bot) {
           { reply_to_message_id: msg.message_id, parse_mode: 'Markdown' }
         );
       }
-      console.log(requestedUsername);
-      // Ключ для поиска в БД
-      const key = requestedUsername || String(actorId);
-      console.log(key);
-       player = await getPlayerDescription(key);
+
+      console.log('requestedUsername:', requestedUsername);
+
+      // Ключ для поиска в БД: сначала actorId, потом username
+      const key = actorId ? String(actorId) : requestedUsername;
+      console.log('DB key:', key);
+
+      const player = await getPlayerDescription(key);
 
       if (!player) {
         return bot.sendMessage(
@@ -59,7 +64,7 @@ module.exports = function (bot) {
       const pubgId = player.pubgId != null ? String(player.pubgId) : '';
 
       const text = `
-🧾 Описание игрока ${escapeMarkdown(requestedUsername)}:
+🧾 Описание игрока ${escapeMarkdown(requestedUsername || `ID ${actorId}`)}:
 
 👤 Имя: ${escapeMarkdown(player.name)}
 🏷 Ник: ${escapeMarkdown(player.nick)}
@@ -72,12 +77,11 @@ module.exports = function (bot) {
         parse_mode: 'Markdown',
         reply_to_message_id: msg.message_id,
         reply_markup: {
-          // кнопку показываем только если есть что копировать
           inline_keyboard: pubgId
             ? [[{ text: '📋 Скопировать PUBG ID', copy_text: { text: pubgId } }]]
             : []
         }
-      }); // ← вот этого закрытия у тебя не хватало
+      });
 
     } catch (error) {
       console.error('Ошибка при получении описания из базы:', error);

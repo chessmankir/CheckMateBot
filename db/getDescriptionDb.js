@@ -6,7 +6,7 @@ module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId)
     console.log(telegramTagOrActorId);
     const res = await db.query(
       `SELECT * FROM clan_members 
-       WHERE LOWER(telegram_tag) = LOWER($1) OR actor_id::text = $1
+       WHERE actor_id::text = $1 OR LOWER(telegram_tag) = LOWER($1) 
        LIMIT 1`,
       [telegramTagOrActorId]
     );
