@@ -11,31 +11,51 @@ function escapeMarkdown(text) {
 }
 
 module.exports = function (bot) {
-  // реагирует на "!описание", "!Описание", "!ОПИСАНИЕ" и т.п.
+  // реагирует на "описание" (без восклицательного знака по твоему коду)
   bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
     // if (!isAllowedChat(chatId)) return;
 
     try {
-      // 1) Явно указанный @ в команде
       const explicitTag = match[1] ? `@${match[1]}` : null;
 
-      // 2) Если команда в ответ — берём пользователя из reply
-      const repliedUser = msg.reply_to_message?.from || null;
+      const replied = msg.reply_to_message || null;
+      const author  = msg.from;
 
-      // 3) Автор команды
-      const author = msg.from;
+      // Ветка/форум даёт "ложный реплай" к шапке темы.
+      // Считаем реплаем только если это НЕ шапка/сервисное и не бот.
+      const isRealReply =
+        !!replied &&
+        !replied.is_topic_message &&
+        !replied.forum_topic_created &&
+        !replied.sender_chat &&                       // на всякий случай, если ответ на канал
+        replied.from && !replied.from.is_bot &&
+        replied.message_id !== msg.message_thread_id; // часто шапка имеет id = thread_id
 
-      // --- Приоритет: actorId ---
-      const actorId = repliedUser?.id ?? author?.id ?? null;
+      let actorId = null;
+      let requestedUsername = null;
 
-      // Если actorId нет — fallback на username/explicitTag
-      const requestedUsername =
-        actorId
-          ? null
-          : explicitTag ||
-            (repliedUser?.username ? `@${repliedUser.username}` : null) ||
-            (author?.username ? `@${author.username}` : null);
+      if (isRealReply) {
+        // есть реальный реплай
+        if (explicitTag) {
+          requestedUsername = explicitTag;            // явный @ важнее
+        } else {
+          actorId = replied.from.id;                  // ищем по id того, на кого ответили
+          requestedUsername = replied.from.username
+            ? `@${replied.from.username}`
+            : null;
+        }
+      } else {
+        // реплая нет (или он "ложный")
+        if (explicitTag) {
+          requestedUsername = explicitTag;            // ищем по явному @
+        } else {
+          actorId = author.id;                        // иначе по автору команды
+          requestedUsername = author.username
+            ? `@${author.username}`
+            : null;
+        }
+      }
 
       if (!requestedUsername && !actorId) {
         return bot.sendMessage(
@@ -45,12 +65,7 @@ module.exports = function (bot) {
         );
       }
 
-      console.log('requestedUsername:', requestedUsername);
-
-      // Ключ для поиска в БД: сначала actorId, потом username
       const key = actorId ? String(actorId) : requestedUsername;
-      console.log('DB key:', key);
-
       const player = await getPlayerDescription(key);
 
       if (!player) {
@@ -82,7 +97,6 @@ module.exports = function (bot) {
             : []
         }
       });
-
     } catch (error) {
       console.error('Ошибка при получении описания из базы:', error);
       bot.sendMessage(chatId, '❌ Произошла ошибка при получении описания.', {
@@ -91,4 +105,3 @@ module.exports = function (bot) {
     }
   });
 };
-
