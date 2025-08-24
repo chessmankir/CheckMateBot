@@ -1,98 +1,102 @@
 // modules/cmd.description.js
-const pool = require('../handlers/db');
+// helper: реальный ли реплай человеку, а не шапке/боту/каналу
 
-// экранирование для HTML
-function esc(s = '') {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const getPlayerDescription = require('./../db/getDescriptionDb');
+const isAllowedChat = require('./../admin/permissionChats');
+
+function escapeMarkdown(text) {
+  if (!text) return '—';
+  return text
+    .replace(/_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/`/g, '\\`')
+    .replace(/\[/g, '\\[');
 }
 
-// универсальный селект по @тегу или actor_id
-async function loadPlayer(client, { tag, actorId }) {
-  // если есть @тег — пробуем сначала по нему
-  if (tag) {
-    const byTag = await client.query(`
-      SELECT name, nickname, pubg_id, age, city, telegram_tag, actor_id
-      FROM clan_members
-      WHERE telegram_tag = $1
-      ORDER BY id DESC
-      LIMIT 1
-    `, [tag]);
-    if (byTag.rows.length) return byTag.rows[0];
+
+function isRealUserReply(msg) {
+  const r = msg.reply_to_message;
+  if (!r) return false;
+  if (!r.from || r.from.is_bot) return false;          // не бот
+  if (r.is_topic_message || r.forum_topic_created) return false; // шапка/сервиска
+  if (r.sender_chat) return false;                      // ответ на канал/чат, не на юзера
+  if (typeof msg.message_thread_id === 'number' && r.message_id === msg.message_thread_id) {
+    // многие клиенты ставят reply на "шапку" с id == thread_id
+    return false;
   }
-  // фолбэк: по actor_id
-  if (actorId) {
-    const byId = await client.query(`
-      SELECT name, nickname, pubg_id, age, city, telegram_tag, actor_id
-      FROM clan_members
-      WHERE actor_id = $1
-      ORDER BY id DESC
-      LIMIT 1
-    `, [actorId]);
-    if (byId.rows.length) return byId.rows[0];
-  }
-  return null;
+  return true;
 }
 
 module.exports = function (bot) {
-  // реагирует на "описание" или "!описание" + опционально @тег
-  bot.onText(/^!?описани[её](?:\s+@(\S+))?$/iu, async (msg, match) => {
+  bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
-
-    // 1) явно указанный @тег
-    const explicitTag = match[1] ? `@${match[1]}` : null;
-
-    // 2) если это ответ на сообщение — берём того, на кого ответили
-    const repliedUser = msg.reply_to_message?.from || null;
-
-    // 3) автор команды (как последний приоритет)
-    const author = msg.from;
-
-    // собираем цель
-    const target = {
-      tag: explicitTag
-        || (repliedUser?.username ? `@${repliedUser.username}` : null)
-        || (author?.username ? `@${author.username}` : null),
-      actorId: explicitTag
-        ? null                                  // если явный тег — actorId не обязателен
-        : (repliedUser?.id ?? author?.id ?? null)
-    };
-
-    if (!target.tag && !target.actorId) {
-      return bot.sendMessage(chatId, '❗️Не удалось определить пользователя (нет username и actor_id).');
-    }
-
-    const client = await pool.connect();
     try {
-      const player = await loadPlayer(client, target);
-      if (!player) {
-        return bot.sendMessage(chatId, '❌ Описание не найдено.', {
-          reply_to_message_id: msg.message_id
-        });
+      const explicitTag = match[1] ? `@${match[1]}` : null;
+      const repliedUser = msg.reply_to_message?.from || null;
+      const author = msg.from;
+
+      const realReply = isRealUserReply(msg);
+
+      let actorId = null;
+      let requestedUsername = null;
+
+      if (explicitTag) {
+        // явный тег — всегда приоритет для поиска по username
+        requestedUsername = explicitTag;
+      } else if (realReply) {
+        // реальный ответ пользователю — приоритет actorId адресата
+        actorId = repliedUser.id;
+        requestedUsername = repliedUser.username ? `@${repliedUser.username}` : null;
+      } else {
+        // нет реплая — берём автора
+        actorId = author.id;
+        requestedUsername = author.username ? `@${author.username}` : null;
       }
 
-      // сборка карточки
-      const title = `🧾 Описание игрока ${esc(player.telegram_tag || '')}:`;
-      const lines = [
-        `👤 Имя: ${esc(player.name || '—')}`,
-        `🏷️ Ник: ${esc(player.nickname || '—')}`,
-        `🎮 PUBG ID: ${esc(player.pubg_id || '—')}`,
-        `🎂 Возраст: ${esc(player.age != null ? String(player.age) : '—')}`,
-        `📍 Город: ${esc(player.city || '—')}`,
-      ];
+      if (!requestedUsername && !actorId) {
+        return bot.sendMessage(
+          chatId,
+          '❗ У пользователя нет username. Укажи @username явно: `!описание @user`',
+          { reply_to_message_id: msg.message_id, parse_mode: 'Markdown' }
+        );
+      }
 
-      const text = `${title}\n\n${lines.join('\n')}`;
+      const key = actorId ? String(actorId) : requestedUsername; // приоритет actorId
+      const player = await getPlayerDescription(key);
+
+      if (!player) {
+        return bot.sendMessage(
+          chatId,
+          `❌ Описание для ${requestedUsername || `ID ${actorId}`} не найдено.`,
+          { reply_to_message_id: msg.message_id }
+        );
+      }
+
+      const pubgId = player.pubgId != null ? String(player.pubgId) : '';
+      const text = `
+🧾 Описание игрока ${escapeMarkdown(requestedUsername || `ID ${actorId}`)}:
+
+👤 Имя: ${escapeMarkdown(player.name)}
+🏷 Ник: ${escapeMarkdown(player.nick)}
+🎮 PUBG ID: \`${escapeMarkdown(pubgId) || '—'}\`
+🎂 Возраст: ${escapeMarkdown(player.age)}
+📍 Город: ${escapeMarkdown(player.city)}
+      `.trim();
 
       await bot.sendMessage(chatId, text, {
-        parse_mode: 'HTML',
+        parse_mode: 'Markdown',
         reply_to_message_id: msg.message_id,
+        reply_markup: {
+          inline_keyboard: pubgId
+            ? [[{ text: '📋 Скопировать PUBG ID', copy_text: { text: pubgId } }]]
+            : []
+        }
       });
-    } catch (e) {
-      console.error('!описание error:', e);
-      bot.sendMessage(chatId, '❌ Ошибка при получении описания.', {
+    } catch (error) {
+      console.error('Ошибка при получении описания из базы:', error);
+      bot.sendMessage(chatId, '❌ Произошла ошибка при получении описания.', {
         reply_to_message_id: msg.message_id
       });
-    } finally {
-      client.release();
     }
   });
 };
