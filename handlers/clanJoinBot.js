@@ -1,21 +1,19 @@
 const db = require('./db');
 const fs = require('fs');
 const saveDescription = require('./saveDescriptionFunc');
-const isAllowedChat = require('../admin/permissionChats');
+const isAllowedChat = require('../admin/permissionChats'); // пока не используется
 const saveMemberDb = require('./saveMemberDb');
 
 const usersInProcess = new Map();
 
-module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
-  // Команда /join
+module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
+  // /start — только в личке
+  bot.onText(/^\/start$/, (msg) => {
+    if (msg.chat.type !== 'private') return; // игнор в группах
 
-  bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
-    console.log('start');
-    // Приветственный текст
     const welcomeText = 'Добро пожаловать в комьюнити Checkmate! ♟️';
 
-    // Отправляем изображение
     bot.sendPhoto(chatId, fs.readFileSync('./Images/IMG_3371.png'), {
       caption: welcomeText,
       filename: 'welcome_image.png',
@@ -33,13 +31,23 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     });
   });
 
-  // Обработка нажатий кнопок
-  bot.on('callback_query', (query) => {
-    const chatId = query.message.chat.id;
+  // Кнопки
+  bot.on('callback_query', async (query) => {
+    const chat = query.message?.chat;
+    const chatId = chat?.id;
     const userId = query.from.id;
 
+    // Запрет запуска из групп/каналов
+    if (chat?.type !== 'private') {
+      await bot.answerCallbackQuery(query.id);
+      return bot.sendMessage(
+        chatId,
+        'Чтобы продолжить, напиши мне в личные сообщения и нажми /start.'
+      );
+    }
+
     if (query.data === 'join_clan') {
-      bot.sendMessage(chatId, 'Ты хочешь вступить в клан?', {
+      return bot.sendMessage(chatId, 'Ты хочешь вступить в клан?', {
         reply_markup: {
           inline_keyboard: [
             [
@@ -52,21 +60,26 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     }
 
     if (query.data === 'join_no') {
+      await bot.answerCallbackQuery(query.id);
       return bot.sendMessage(chatId, 'Хорошо, может в следующий раз 😊', {
-        reply_to_message_id: query.message.message_id,
+        reply_to_message_id: query.message.message_id
       });
     }
 
     if (query.data === 'join_yes') {
-      usersInProcess.set(userId, { step: 'invite', data: {} });
-      bot.sendMessage(chatId, 'Введи свой инвайт-код:', {
-        reply_to_message_id: query.message.message_id,
+      await bot.answerCallbackQuery(query.id);
+      // сохраняем, в каком чате идёт анкета (личка)
+      usersInProcess.set(userId, { step: 'invite', expectedChatId: chatId, data: {} });
+      return bot.sendMessage(chatId, 'Введи свой инвайт-код:', {
+        reply_to_message_id: query.message.message_id
       });
     }
   });
 
-  // Пошаговая анкета
+  // Пошаговая анкета — только личка и только тот же чат
   bot.on('message', async (msg) => {
+    if (msg.chat.type !== 'private') return; // полностью игнорим группы/каналы
+
     const chatId = msg.chat.id;
     const userId = msg.from.id;
     const text = msg.text?.trim();
@@ -75,6 +88,7 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     if (!usersInProcess.has(userId)) return;
 
     const user = usersInProcess.get(userId);
+    if (user.expectedChatId && user.expectedChatId !== chatId) return; // сообщение не из того чата
 
     // Шаг 1 — проверка инвайта
     if (user.step === 'invite') {
@@ -84,7 +98,10 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
         [code]
       );
       if (res.rowCount === 0) {
-        return bot.sendMessage(chatId, '❌ Код недействителен или уже использован. Введи снова:');
+        return bot.sendMessage(
+          chatId,
+          '❌ Код недействителен или уже использован. Введи снова:'
+        );
       }
 
       user.data.inviteCode = code;
@@ -104,9 +121,10 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     if (user.step === 'name') {
       user.data.name = text;
       user.step = 'nick';
-      return bot.sendMessage(chatId, 'Введи свой игровой ник');
+      return bot.sendMessage(chatId, 'Введи свой игровой ник:');
     }
 
+    // Шаг 3.1 — ник
     if (user.step === 'nick') {
       user.data.nick = text;
       user.step = 'age';
@@ -124,16 +142,18 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
     if (user.step === 'city') {
       user.data.city = text;
 
+      const target_username = msg.from.username ? `@${msg.from.username}` : '';
+
       const dataToSave = {
         name: user.data.name,
         nick: user.data.nick || '',
-        target_username: "@" + msg.from.username || '',
+        target_username, // корректно
         pubg_id: user.data.pubg_id,
         age: user.data.age,
         city: user.data.city,
         clan: user.data.clan,
         actor_id: userId,
-        date: 0,
+        date: 0
       };
 
       try {
@@ -143,20 +163,25 @@ module.exports = function(bot, notifyChatId, inviteLink1, inviteLink2) {
         ]);
         await saveMemberDb(dataToSave);
 
-        await bot.sendMessage(chatId, '🎉 Ты принят в клан! Добро пожаловать в клан CheckMate♟️'); 
-        
-        if (dataToSave.clan == 1 || dataToSave.clan == 2){
-          await bot.sendMessage(chatId, inviteLink1 );
-        }
-        else{
-          await bot.sendMessage(chatId, inviteLink2 );
+        await bot.sendMessage(
+          chatId,
+          '🎉 Ты принят в клан! Добро пожаловать в клан CheckMate♟️'
+        );
+
+        if (Number(dataToSave.clan) === 1 || Number(dataToSave.clan) === 2) {
+          await bot.sendMessage(chatId, inviteLink1);
+        } else {
+          await bot.sendMessage(chatId, inviteLink2);
         }
       } catch (err) {
-        console.error('❌ Ошибка при приёме в клан:', err.message);
-        await bot.sendMessage(chatId, 'Произошла ошибка при сохранении данных. Попробуй позже.');
+        console.error('❌ Ошибка при приёме в клан:', err);
+        await bot.sendMessage(
+          chatId,
+          'Произошла ошибка при сохранении данных. Попробуй позже.'
+        );
+      } finally {
+        usersInProcess.delete(userId);
       }
-
-      usersInProcess.delete(userId);
     }
   });
 };
