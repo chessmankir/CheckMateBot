@@ -7,11 +7,9 @@ const ALLOWED_CHAT_IDS = [
 ];
 
 module.exports = function (bot) {
-  bot.onText(/!разбан1\s+@(\S+)/, async (msg, match) => {
+  bot.onText(/!разбан\s+@(\S+)/, async (msg, match) => {
     const chatId = msg.chat.id;
-    console.log('разюан');
     if (!isAllowedChat(chatId)) return;
-    console.log('allowed');
     const tag = `@${match[1]}`.toLowerCase();
 
     try {

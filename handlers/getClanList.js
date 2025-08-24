@@ -1,5 +1,6 @@
 const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
+const isAdminChat = require('../admin/permissionAdminChat');
 
 const clanLimits = {
   1: 50,
@@ -14,7 +15,7 @@ module.exports = function (bot) {
   bot.onText(/!список(\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const clanNumber = parseInt(match[1]);
-    if (!isAllowedChat(chatId)) return;
+    if (!isAdminChat(chatId)) return;
 
     if (!clanLimits[clanNumber]) {
       return bot.sendMessage(chatId, '❌ Неверный номер клана.', {

@@ -15,7 +15,7 @@ async function getSheetIdByTitle(sheets, spreadsheetId, title) {
 }
 
 module.exports = function (bot, auth, SPREADSHEET_ID) {
-  bot.onText(/^!бан1\s+@(\S+)/, async (msg, match) => {
+  bot.onText(/^!бан\s+@(\S+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     if (!isAdminChat(chatId)) return;
 

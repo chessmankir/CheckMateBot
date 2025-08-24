@@ -12,7 +12,7 @@ function escapeMarkdown(text) {
 
 module.exports = function (bot) {
   // реагирует на "!описание", "!Описание", "!ОПИСАНИЕ" и т.п.
-  bot.onText(/^!описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
+  bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
    // if (!isAllowedChat(chatId)) return;
 

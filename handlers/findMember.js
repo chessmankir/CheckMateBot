@@ -1,10 +1,11 @@
 const db = require('../handlers/db'); // путь к подключению к базе
 const isAllowedChat = require('../admin/permissionChats');
+const isAdminChat = require('../admin/permissionAdminChat');
 
 module.exports = function (bot) {
   bot.onText(/!поиск\s+(.+)/i, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAllowedChat(chatId)) return;
+    if (!isAdminChat(chatId)) return;
 
     const query = match[1].trim().toLowerCase();
 

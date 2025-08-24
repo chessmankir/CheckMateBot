@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
+const isAdminChat = require('../admin/permissionAdminChat');
 
 function generateCode() {
   return 'CLAN-' + Math.floor(100000 + Math.random() * 900000);
@@ -9,6 +10,8 @@ function generateCode() {
 module.exports = function(bot) {
   bot.onText(/!инвайт(\d+)/, async (msg, match) => {
     const clanNumber = parseInt(match[1]);
+    const chatId = msg.chat.id;
+    if (!isAdminChat(chatId)) return;
 
     if (isNaN(clanNumber)) {
       return bot.sendMessage(msg.chat.id, '❗ Укажи номер клана: !инвайт1, !инвайт2 и т.д.', {
