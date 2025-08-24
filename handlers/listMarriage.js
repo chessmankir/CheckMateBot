@@ -1,8 +1,17 @@
+// modules/cmd.marriages.js
 const pool = require('../handlers/db');
 
-// утилита: паддинг чисел
+// -------- utils --------
 function pad(n) {
   return n.toString().padStart(2, '0');
+}
+
+/** Экранируем под HTML */
+function escHtml(s = '') {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 /**
@@ -16,12 +25,8 @@ function diffPretty(startDate) {
   // месяцы (календарно)
   let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
   const tmp = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    start.getDate(),
-    start.getHours(),
-    start.getMinutes(),
-    start.getSeconds()
+    now.getFullYear(), now.getMonth(),
+    start.getDate(), start.getHours(), start.getMinutes(), start.getSeconds()
   );
   if (now < tmp) months = Math.max(0, months - 1);
 
@@ -29,16 +34,17 @@ function diffPretty(startDate) {
   const afterMonths = new Date(start);
   afterMonths.setMonth(afterMonths.getMonth() + months);
 
-  // дни
+  // дни (целые)
   const msDay = 24 * 60 * 60 * 1000;
   let days = Math.floor((now - afterMonths) / msDay);
   if (days < 0) days = 0;
 
-  // часы
+  // часы (остаток)
   const afterDays = new Date(afterMonths.getTime() + days * msDay);
   let hours = Math.floor((now - afterDays) / (60 * 60 * 1000));
   if (hours < 0) hours = 0;
 
+  // сборка строки
   const chunks = [];
   if (months > 0) {
     const m = months % 10;
@@ -49,15 +55,13 @@ function diffPretty(startDate) {
     chunks.push(`${months} ${word}`);
   }
   if (days > 0) chunks.push(`${days} дн`);
-  if (hours > 0 && months === 0) chunks.push(`${hours} ч`);
+  if (hours > 0 && months === 0) chunks.push(`${hours} ч`); // часы показываем только если меньше месяца
   if (chunks.length === 0) chunks.push('менее часа');
 
   return chunks.join(' ');
 }
 
-/**
- * Формат @username или Имя Фамилия
- */
+/** Формат имени: @username или Имя Фамилия */
 function formatName(row, side) {
   const u = side === 'a' ? row.a_username : row.b_username;
   const first = side === 'a' ? row.a_first_name : row.b_first_name;
@@ -67,37 +71,16 @@ function formatName(row, side) {
   return [first || '', last || ''].join(' ').trim() || 'Безымянный';
 }
 
-/**
- * Экранирование под MarkdownV2
- */
-function escMd(s = '') {
-  return String(s)
-    .replace(/_/g, '\\_')
-    .replace(/\*/g, '\\*')
-    .replace(/\[/g, '\\[')
-    .replace(/`/g, '\\`')
-    .replace(/>/g, '\\>')
-    .replace(/#/g, '\\#')
-    .replace(/\+/g, '\\+')
-    .replace(/-/g, '\\-')
-    .replace(/=/g, '\\=')
-    .replace(/\|/g, '\\|')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/\./g, '\\.')
-    .replace(/!/g, '\\!');
-}
-
 module.exports = function marriagesCommand(bot) {
   bot.onText(/^!браки$/i, async (msg) => {
     const chatId = msg.chat.id;
 
     try {
-      // 1) Тянем активные браки этого чата
+      // 1) Тянем активные браки этого чата, старшие – первыми
       const { rows } = await pool.query(`
         SELECT m.id, m.started_at,
-               ua.telegram_tag AS a_username, ua.name AS a_first_name,
-               ub.telegram_tag AS b_username, ub.name AS b_first_name
+               ua.telegram_tag AS a_username, ua.name AS a_first_name, ua.last_name AS a_last_name,
+               ub.telegram_tag AS b_username, ub.name AS b_first_name, ub.last_name AS b_last_name
         FROM marriages m
         JOIN clan_members ua ON ua.actor_id = m.partner_a_id
         JOIN clan_members ub ON ub.actor_id = m.partner_b_id
@@ -106,12 +89,14 @@ module.exports = function marriagesCommand(bot) {
       `, [chatId]);
 
       if (!rows.length) {
-        return bot.sendMessage(chatId, 'Пока нет браков в этом чате 💔');
+        return bot.sendMessage(chatId, 'Пока нет браков в этом чате 💔', {
+          reply_to_message_id: msg.message_id
+        });
       }
 
       // 2) Готовим строки
-      const green = [];
-      const newly = [];
+      const green = [];    // >= 1 мес
+      const newly = [];    // < 1 мес
 
       for (const r of rows) {
         const left  = formatName(r, 'a');
@@ -119,38 +104,39 @@ module.exports = function marriagesCommand(bot) {
         const when  = diffPretty(r.started_at);
         const line  = `${left} + ${right} (${when})`;
 
+        // вычислим "целые месяцы" календарно (как в diffPretty)
         const mOld = (new Date().getFullYear() - new Date(r.started_at).getFullYear()) * 12
                    + (new Date().getMonth() - new Date(r.started_at).getMonth());
-
         const start = new Date(r.started_at);
         const now = new Date();
         const tmp = new Date(
           now.getFullYear(), now.getMonth(),
-          start.getDate(), start.getHours(),
-          start.getMinutes(), start.getSeconds()
+          start.getDate(), start.getHours(), start.getMinutes(), start.getSeconds()
         );
         const months = now < tmp ? Math.max(0, mOld - 1) : mOld;
 
         if (months >= 1) green.push(line); else newly.push(line);
       }
 
-      // 3) Собираем сообщение
-      let text = '💍 *Браки этого чата*\n\n';
+      // 3) Собираем HTML-сообщение (экранируем динамику)
+      let text = '💍 <b>Браки этого чата</b>\n\n';
+
       if (green.length) {
-        text += '🌿 *Зелёная свадьба*\n';
-        green.forEach((l, i) => { text += `${i + 1}. ${escMd(l)}\n`; });
+        text += '🌿 <b>Зелёная свадьба</b>\n';
+        green.forEach((l, i) => { text += `${i + 1}. ${escHtml(l)}\n`; });
         text += '\n';
       }
       if (newly.length) {
-        text += '🦁 *Молодожёны*\n';
+        text += '🦁 <b>Молодожёны</b>\n';
         const startIdx = green.length ? green.length + 1 : 1;
-        newly.forEach((l, i) => { text += `${startIdx + i}. ${escMd(l)}\n`; });
+        newly.forEach((l, i) => { text += `${startIdx + i}. ${escHtml(l)}\n`; });
         text += '\n';
       }
-      text += '💬 Чтобы вступить в брак с участником чата, введите команду `брак @юзер`.';
+
+      text += '💬 Чтобы вступить в брак с участником чата, введите команду <code>брак @юзер</code>.';
 
       await bot.sendMessage(chatId, text, {
-        parse_mode: 'MarkdownV2',
+        parse_mode: 'HTML',
         reply_to_message_id: msg.message_id
       });
     } catch (e) {
