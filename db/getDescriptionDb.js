@@ -3,7 +3,7 @@ const db = require('../handlers/db'); // подключение к базе
 
 module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId) {
   try {
-    console.log(telegramTagOrActorId);
+    // console.log(telegramTagOrActorId);
     const res = await db.query(
       `SELECT * FROM public.clan_members 
        WHERE actor_id::text = $1 OR LOWER(telegram_tag) = LOWER($1) 

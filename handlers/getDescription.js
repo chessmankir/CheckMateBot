@@ -15,14 +15,15 @@ function escapeMarkdown(text) {
 // реальный ли реплай пользователю (а не шапке/боту/каналу)
 function isRealUserReply(msg) {
   const r = msg.reply_to_message;
-  console.log(r);
   if (!r) return false;
   console.log('1');
   if (!r.from || r.from.is_bot) return false;          // не бот
   console.log('2');
-/*  if (r.is_topic_message || r.forum_topic_created) return false; */
+  if (r.is_topic_message && r.forum_topic_created){
+    return false;
+  } 
   console.log('3');
-  if (r.sender_chat) return false;                      // ответ на канал/чат
+ // if (r.sender_chat) return false;                      // ответ на канал/чат
   console.log('4');
   /*if (typeof msg.message_thread_id === 'number' && r.message_id === msg.message_thread_id) {
     console.log('5');
@@ -36,7 +37,7 @@ module.exports = function (bot) {
   bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
     // if (!isAllowedChat(chatId)) return;
-
+    console.log("description");
     try {
       const explicitTag = match[1] ? `@${match[1]}` : null;
       const author = msg.from;
@@ -57,7 +58,8 @@ module.exports = function (bot) {
         console.log('actor');
         actorId = author?.id ?? null;
       }
-      
+      console.log('test');
+      console.log(actorId);
       if (!requestedUsername && !actorId) {
         return bot.sendMessage(
           chatId,
