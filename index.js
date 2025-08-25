@@ -53,7 +53,7 @@ require('./handlers/listMarriage')(bot);
 require('./handlers/landmate')(bot);
 // require('./scripts/warmupCities');
 require('./handlers/greetings')(bot);
-
+require('./handlers/infoPlaces')(bot);
 
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
