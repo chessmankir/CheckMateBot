@@ -15,14 +15,20 @@ function escapeMarkdown(text) {
 // реальный ли реплай пользователю (а не шапке/боту/каналу)
 function isRealUserReply(msg) {
   const r = msg.reply_to_message;
+  console.log(r);
   if (!r) return false;
+  console.log('1');
   if (!r.from || r.from.is_bot) return false;          // не бот
-  if (r.is_topic_message || r.forum_topic_created) return false; // шапка/сервиска
+  console.log('2');
+/*  if (r.is_topic_message || r.forum_topic_created) return false; */
+  console.log('3');
   if (r.sender_chat) return false;                      // ответ на канал/чат
-  if (typeof msg.message_thread_id === 'number' && r.message_id === msg.message_thread_id) {
+  console.log('4');
+  /*if (typeof msg.message_thread_id === 'number' && r.message_id === msg.message_thread_id) {
+    console.log('5');
     // многие клиенты ставят reply на «шапку» с id == thread_id
     return false;
-  }
+  }*/
   return true;
 }
 
@@ -40,15 +46,18 @@ module.exports = function (bot) {
 
       // 1) Явный @ всегда можно указать
       if (explicitTag) {
+        console.log('explicitTag');
         requestedUsername = explicitTag;
       } else if (isRealUserReply(msg)) {
+        console.log('isRealUserReply');
         // 2) Реальный реплай — берём id адресата
         actorId = msg.reply_to_message.from.id;
       } else {
         // 3) Реплая нет — берём автора команды
+        console.log('actor');
         actorId = author?.id ?? null;
       }
-
+      
       if (!requestedUsername && !actorId) {
         return bot.sendMessage(
           chatId,
@@ -59,6 +68,7 @@ module.exports = function (bot) {
 
       // Ключ поиска: приоритет actorId
       const key = actorId ? String(actorId) : requestedUsername;
+      console.log(key);
       const player = await getPlayerDescription(key);
 
       if (!player) {
@@ -100,4 +110,3 @@ module.exports = function (bot) {
     }
   });
 };
-
