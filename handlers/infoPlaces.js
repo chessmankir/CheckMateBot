@@ -14,7 +14,7 @@ const clanLimits = {
 module.exports = function (bot) {
   bot.onText(/^!места$/iu, async (msg) => {
     const chatId = msg.chat.id;
-    // if (!isAllowedChat(chatId)) return;
+     if (!isAllowedChat(chatId)) return;
 
     try {
       // Считаем активных по каждому клану
