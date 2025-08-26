@@ -19,7 +19,7 @@ async function getSheets() {
 }
 
 module.exports = function (bot, auth, SPREADSHEET_ID) {
-  bot.onText(/^\+ник1(?:\s+@(\S+)\s+(.+)|\s+(.+))?$/, async (msg, match) => {
+  bot.onText(/^\+ник(?:\s+@(\S+)\s+(.+)|\s+(.+))?$/, async (msg, match) => {
     const chatId = msg.chat.id;
     const fromUser = msg.from.username ? `@${msg.from.username}` : null;
 
