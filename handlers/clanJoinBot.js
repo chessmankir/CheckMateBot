@@ -3,6 +3,7 @@ const fs = require('fs');
 const saveDescription = require('./saveDescriptionFunc');
 const isAllowedChat = require('../admin/permissionChats'); // пока не используется
 const saveMemberDb = require('./saveMemberDb');
+const getPlayerDescription = require('./../db/getDescriptionDb');
 
 const usersInProcess = new Map();
 
@@ -67,8 +68,18 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
     }
 
     if (query.data === 'join_yes') {
+
+      //
       await bot.answerCallbackQuery(query.id);
       // сохраняем, в каком чате идёт анкета (личка)
+      const player = await getPlayerDescription(userId);
+      if(player != null){
+        bot.sendMessage(chatId, 'Вы уже были в клане', {
+          reply_to_message_id: query.message.message_id
+        });
+        return;
+      }
+      
       usersInProcess.set(userId, { step: 'invite', expectedChatId: chatId, data: {} });
       return bot.sendMessage(chatId, 'Введи свой инвайт-код:', {
         reply_to_message_id: query.message.message_id

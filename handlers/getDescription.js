@@ -1,6 +1,7 @@
 // modules/cmd.description.js
 // helper: реальный ли реплай человеку, а не шапке/боту/каналу
 const getPlayerDescription = require('./../db/getDescriptionDb');
+const getPartner = require('./../handlers/getMarriagePartner');
 const isAllowedChat = require('./../admin/permissionChats');
 
 function escapeMarkdown(text) {
@@ -18,13 +19,13 @@ function isRealUserReply(msg) {
   if (!r) return false;
   console.log('1');
   if (!r.from || r.from.is_bot) return false;          // не бот
-  console.log('2');
+  
   if (r.is_topic_message && r.forum_topic_created){
     return false;
   } 
-  console.log('3');
+  
  // if (r.sender_chat) return false;                      // ответ на канал/чат
-  console.log('4');
+  
   /*if (typeof msg.message_thread_id === 'number' && r.message_id === msg.message_thread_id) {
     console.log('5');
     // многие клиенты ставят reply на «шапку» с id == thread_id
@@ -58,8 +59,6 @@ module.exports = function (bot) {
         console.log('actor');
         actorId = author?.id ?? null;
       }
-      console.log('test');
-      console.log(actorId);
       if (!requestedUsername && !actorId) {
         return bot.sendMessage(
           chatId,
@@ -70,7 +69,6 @@ module.exports = function (bot) {
 
       // Ключ поиска: приоритет actorId
       const key = actorId ? String(actorId) : requestedUsername;
-      console.log(key);
       const player = await getPlayerDescription(key);
 
       if (!player) {
@@ -85,7 +83,8 @@ module.exports = function (bot) {
       // что показывать в заголовке (если искали по ID — показываем ID)
       const subjectForText = actorId ? `ID ${actorId}` : requestedUsername;
 
-      const text = `
+      
+      let text = `
 🧾 Описание игрока ${escapeMarkdown(subjectForText)}:
 
 👤 Имя: ${escapeMarkdown(player.name)}
@@ -94,7 +93,13 @@ module.exports = function (bot) {
 🎂 Возраст: ${escapeMarkdown(player.age)}
 📍 Город: ${escapeMarkdown(player.city)}
       `.trim();
+    const partner = await getPartner(key);
+      if(partner != null){
+        if (partner && partner.partner_tag) {
+          text += `\n❤️ Этот пользователь в отношениях с ${escapeMarkdown(partner.partner_tag)}`;
+        }
 
+      }
       await bot.sendMessage(chatId, text, {
         parse_mode: 'Markdown',
         reply_to_message_id: msg.message_id,
