@@ -54,6 +54,8 @@ require('./handlers/landmate')(bot);
 // require('./scripts/warmupCities');
 require('./handlers/greetings')(bot);
 require('./handlers/infoPlaces')(bot);
+const marryProposal = require('./handlers/marriageProposal');
+marryProposal(bot);
 
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
