@@ -221,7 +221,7 @@ module.exports = function marryProposal(bot) {
       const { rowCount } = await pool.query(
         `UPDATE marriage_proposals
          SET status = 'expired'
-         WHERE status = 'pending' AND created_at < now() - interval '24 hours'`
+         WHERE status = 'pending' AND created_at < now() - interval '1 hours'`
       );
       if (rowCount) {
         // можно дополнительно убирать клавиатуры у старых сообщений, если нужно
