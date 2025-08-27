@@ -5,7 +5,7 @@ const isAllowedChat = require('./../admin/permissionChats');
 
 module.exports = function (bot) {
   // !+правила1 <текст>
-  bot.onText(/^!\+правила1\s+([\s\S]+)/, async (msg, match) => {
+  bot.onText(/^!\+правила\s+([\s\S]+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const text = match[1].trim();
 
@@ -35,7 +35,7 @@ module.exports = function (bot) {
   });
 
   // !правила1
-  bot.onText(/^!правила1$/, async (msg) => {
+  bot.onText(/^правила1$/, async (msg) => {
     const chatId = msg.chat.id;
     if (!isAllowedChat(chatId)) return
 
