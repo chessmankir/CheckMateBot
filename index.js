@@ -56,6 +56,12 @@ require('./handlers/greetings')(bot);
 require('./handlers/infoPlaces')(bot);
 const marryProposal = require('./handlers/marriageProposal');
 marryProposal(bot);
+require('./handlers/divorce')(bot);
+
+require('./update/setAge')(bot, auth, SPREADSHEET_ID);
+require('./update/setCity')(bot, auth, SPREADSHEET_ID);
+require('./update/setName')(bot, auth, SPREADSHEET_ID);
+require('./update/help')(bot);
 
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
