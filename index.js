@@ -62,6 +62,7 @@ require('./update/setAge')(bot, auth, SPREADSHEET_ID);
 require('./update/setCity')(bot, auth, SPREADSHEET_ID);
 require('./update/setName')(bot, auth, SPREADSHEET_ID);
 require('./update/help')(bot);
+require('./handlers/listNick')(bot);
 
 require('./handlers/saveDescription')(bot);
 require('./handlers/getDescription')(bot, auth, SPREADSHEET_ID);
