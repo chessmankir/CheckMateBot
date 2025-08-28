@@ -35,7 +35,7 @@ module.exports = function (bot) {
   });
 
   // !правила1
-  bot.onText(/^правила1$/, async (msg) => {
+  bot.onText(/^правила$/, async (msg) => {
     const chatId = msg.chat.id;
     if (!isAllowedChat(chatId)) return
 
