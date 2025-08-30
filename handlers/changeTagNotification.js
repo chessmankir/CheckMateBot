@@ -40,8 +40,10 @@ module.exports = function watchUsernameChanges(bot, notifyChatId, SpeadSheetId) 
       const dbTag = rows[0].telegram_tag || null;
 
       const norm = (s) => (s ? s.trim().toLowerCase() : null);
-      if (norm(dbTag) === norm(currentUsername)) return;
+      if (norm(dbTag) === norm(currentUsername)){
+        return;
 
+      } 
       const whoRaw = msg.from.username
         ? `@${msg.from.username}`
         : `${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim();
@@ -56,7 +58,6 @@ module.exports = function watchUsernameChanges(bot, notifyChatId, SpeadSheetId) 
 
       lastNotifiedAt.set(actorId, now);
 
-      if (autoUpdate) {
         await pool.query(
           `UPDATE clan_members
               SET telegram_tag = $2
@@ -66,7 +67,7 @@ module.exports = function watchUsernameChanges(bot, notifyChatId, SpeadSheetId) 
 
         const rawUpd = `✅ Обновил тег в базе на ${currentUsername || '—'}`; // без точки
         await sendMdV2(bot, targetChatId, rawUpd);
-      }
+      
     } catch (err) {
       console.error('watchUsernameChanges error:', err);
     }
