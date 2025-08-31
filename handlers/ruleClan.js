@@ -34,10 +34,12 @@ module.exports = function (bot) {
     }
   });
 
-  // !правила1
-  bot.onText(/^правила$/, async (msg) => {
+  // правила
+    bot.onText(/^\s*правила\s*$/i, async (msg) => {
+
     const chatId = msg.chat.id;
-    if (!isAllowedChat(chatId)) return
+      
+   // if (!isAllowedChat(chatId)) return
 
     try {
       const result = await db.query(`SELECT content FROM rules WHERE id = 1`);

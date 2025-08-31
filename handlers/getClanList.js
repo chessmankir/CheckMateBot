@@ -4,7 +4,7 @@ const isAdminChat = require('../admin/permissionAdminChat');
 
 const clanLimits = {
   1: 50,
-  2: 55,
+  2: 60,
   3: 60,
   4: 35 
 };
