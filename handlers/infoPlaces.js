@@ -6,7 +6,7 @@ const isAllowedChat = require('../admin/permissionChats');
 // Текущие лимиты кланов
 const clanLimits = {
   1: 50,
-  2: 55,
+  2: 60,
   3: 60,
   4: 35
 };
@@ -14,13 +14,13 @@ const clanLimits = {
 module.exports = function (bot) {
   bot.onText(/^!места$/iu, async (msg) => {
     const chatId = msg.chat.id;
-     if (!isAllowedChat(chatId)) return;
+    // if (!isAllowedChat(chatId)) return;
 
     try {
       // Считаем активных по каждому клану
       const res = await db.query(
         `SELECT clan, COUNT(*)::int AS count
-         FROM clan_members
+         FROM public.clan_members
          WHERE active = TRUE
          GROUP BY clan`
       );
