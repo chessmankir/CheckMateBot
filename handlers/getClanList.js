@@ -23,7 +23,7 @@ module.exports = function (bot) {
       });
     }
 
-    try {
+    try { 
       const res = await db.query(
         'SELECT telegram_tag, nickname, created_at FROM clan_members WHERE clan = $1 AND active = TRUE ORDER BY telegram_tag',
         [clanNumber]
