@@ -23,9 +23,19 @@ module.exports = function(bot, notifyChatId, threadMessageId) {
         `✅ Вступил в группу "${chatTitle}": ${name}` +
         (player ? `\nНик: ${player.nick}\nКлан: ${player.clan}` : '');
 
-      return bot.sendMessage(notifyChatId, message, {
+      /*return bot.sendMessage(notifyChatId, message, {
         reply_to_message_id: threadMessageId
-      });
+      }); */
+
+      try {
+        await bot.sendMessage(notifyChatId, message, {
+          reply_to_message_id: threadMessageId, // если он валидный
+        //  allow_sending_without_reply: true
+        });
+      } catch (err) {
+      //  console.error('⚠️ Ошибка при отправке сообщения в notifyChatId:', err.description || err.message);
+      }
+
     })
   );
 });
@@ -61,9 +71,15 @@ module.exports = function(bot, notifyChatId, threadMessageId) {
         `🚪 Вышел из группы "${chatTitle}": ${name}` +
         (player ? `\nНик: ${player.nick}\nКлан: ${player.clan}` : '');
 
-      await bot.sendMessage(notifyChatId, message, {
-        reply_to_message_id: threadMessageId
-      });
+      try {
+        await bot.sendMessage(notifyChatId, message, {
+          reply_to_message_id: threadMessageId, // если он валидный
+         // allow_sending_without_reply: true
+        });
+      } catch (err) {
+       // console.error('⚠️ Ошибка при отправке сообщения в notifyChatId:', err.description || err.message);
+      }
+
 
     } catch (error) {
       console.error('Ошибка обработки chat_member:', error);
