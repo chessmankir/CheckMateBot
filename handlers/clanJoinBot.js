@@ -7,6 +7,11 @@ const getPlayerDescription = require('./../db/getDescriptionDb');
 
 const usersInProcess = new Map();
 
+function hasUsername(from) {
+  // username должен быть не пустой строкой
+  return Boolean(from && typeof from.username === 'string' && from.username.trim().length > 0);
+}
+
 module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
   // /start — только в личке
   bot.onText(/^\/start$/, (msg) => {
@@ -47,8 +52,65 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
       );
     }
 
+    // 0) Предпроверка username при клике "Хочешь вступить в клан?"
     if (query.data === 'join_clan') {
+      await bot.answerCallbackQuery(query.id);
+
+      if (!hasUsername(query.from)) {
+        // Нет username — объясняем и даём кнопку на повторную проверку
+        return bot.sendMessage(chatId,
+          '⚠️ У тебя не установлен Telegram username.\n\n' +
+          'Это обязательное требование клана — по нему мы связываем анкеты и профили.\n\n' +
+          '👉 Открой свой профиль Telegram и установи username (напр. ChessFan123). ' +
+          'После этого нажми кнопку ниже, и я проверю ещё раз.',
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: 'Проверить username', callback_data: 'check_username' }
+                ]
+              ]
+            }
+          }
+        );
+      }
+
+      // username есть — идём по обычному сценарию
       return bot.sendMessage(chatId, 'Ты хочешь вступить в клан?', {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: 'Да ✅', callback_data: 'join_yes' },
+              { text: 'Нет ❌', callback_data: 'join_no' }
+            ]
+          ]
+        }
+      });
+    }
+
+    // 0.1) Повторная проверка по кнопке "Проверить username"
+    if (query.data === 'check_username') {
+      await bot.answerCallbackQuery(query.id);
+      if (!hasUsername(query.from)) {
+        // Всё ещё нет username — просим снова
+        return bot.sendMessage(chatId,
+          '❌ Username всё ещё не установлен.\n\n' +
+          'Пожалуйста, зайди в профиль Telegram и задай username. ' +
+          'Затем нажми кнопку ниже, чтобы я проверил ещё раз.',
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: 'Проверить username', callback_data: 'check_username' }
+                ]
+              ]
+            }
+          }
+        );
+      }
+
+      // Отлично, теперь есть — продолжаем сценарий
+      return bot.sendMessage(chatId, 'Отлично! Username найден ✅\n\nТы хочешь вступить в клан?', {
         reply_markup: {
           inline_keyboard: [
             [
@@ -68,18 +130,34 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
     }
 
     if (query.data === 'join_yes') {
-
-      //
       await bot.answerCallbackQuery(query.id);
+
+      // Доп. защита: если юзер дошёл сюда без username (почти невозможно, но на всякий случай)
+      if (!hasUsername(query.from)) {
+        return bot.sendMessage(chatId,
+          '⚠️ Перед вступлением нужно установить Telegram username.\n' +
+          'После установки нажми «Проверить username».',
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: 'Проверить username', callback_data: 'check_username' }
+                ]
+              ]
+            }
+          }
+        );
+      }
+
       // сохраняем, в каком чате идёт анкета (личка)
       const player = await getPlayerDescription(userId);
-      if(player != null){
+      if (player != null) {
         bot.sendMessage(chatId, 'Вы уже были в клане', {
           reply_to_message_id: query.message.message_id
         });
         return;
       }
-      
+
       usersInProcess.set(userId, { step: 'invite', expectedChatId: chatId, data: {} });
       return bot.sendMessage(chatId, 'Введи свой инвайт-код:', {
         reply_to_message_id: query.message.message_id
