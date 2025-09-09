@@ -6,7 +6,7 @@ const clanLimits = {
   1: 55,
   2: 60,
   3: 60,
-  4: 35 
+  4: 40 
 };
 
 module.exports = function (bot) {
