@@ -49,7 +49,6 @@ async function recordActivity(msg, tz = 'Europe/Berlin') {
 }
 
 async function getUserStats(chatId, userId) {
-  console.log(userId);
   const { rows: totalRows } = await pool.query(
     `SELECT total_count, last_msg_at
      FROM user_activity_totals
@@ -61,17 +60,17 @@ async function getUserStats(chatId, userId) {
   const { rows: r7 } = await pool.query(
     `SELECT COALESCE(SUM(msg_count),0) AS c
      FROM message_stats_daily
-     WHERE chat_id = $1 AND user_id = $2
+     WHERE user_id = $1
        AND day >= (CURRENT_DATE - INTERVAL '6 day')`,
-    [chatId, userId]
+    [userId]
   );
 
   const { rows: r30 } = await pool.query(
     `SELECT COALESCE(SUM(msg_count),0) AS c
      FROM message_stats_daily
-     WHERE chat_id = $1 AND user_id = $2
+     WHERE user_id = $1
        AND day >= (CURRENT_DATE - INTERVAL '29 day')`,
-    [chatId, userId]
+    [userId]
   );
 
   return {

@@ -149,7 +149,7 @@ module.exports = function (bot) {
         }
       });
     } catch (error) {
-      console.error('Ошибка при получении описания из базы:', error);
+      console.error('ошибка', error);
       bot.sendMessage(chatId, '❌ Произошла ошибка при получении описания.', {
         reply_to_message_id: msg.message_id
       });

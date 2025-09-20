@@ -3,7 +3,7 @@ const { notifyChatId, threadMessageId, inviteLink1, inviteLink2 } = require('./c
 // test web
 
 require('dotenv').config(); // Загружает переменные из .env
-const token = process.env.TELEGRAM_TOKEN; 
+const token = process.env.TELEGRAM_TOKEN2; 
 
 
 const bot = new TelegramBot(token, {

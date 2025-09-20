@@ -1,4 +1,5 @@
 // modules/cmd.activity.js
+const { error } = require('console');
 const { getUserStats, getTopActive } = require('../handlers/activityTracker');
 const getPlayerDescription = require('./../db/getDescriptionDb');
 
@@ -40,16 +41,15 @@ module.exports = function (bot) {
     if (match[1]) {
       // если указали @username — попробуем получить через getChatMember (сработает, если он есть/был в чате)
       try{
-        const uname = match[1];
-        console.log(uname);
-        const player = await getPlayerDescription(uname);
-        console.log(player);
+    //    const uname = match[1];
+        const explicitTag = match[1] ? `@${match[1]}` : null;
+        const player = await getPlayerDescription(explicitTag);
+        if (player == null){ return;}
         userId = player.tgId;
       }
       catch(e){
-       console.log('ошибка статистики');
-        return;
-        
+        console.log('Ошибка активности', error);
+        return;   
       }
     }
 

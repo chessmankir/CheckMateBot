@@ -2,6 +2,7 @@
 const db = require('../handlers/db'); // подключение к базе
 
 module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId) {
+  console.log(telegramTagOrActorId);
   try {
     // console.log(telegramTagOrActorId);
     const res = await db.query(
@@ -14,6 +15,7 @@ module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId)
     if (res.rows.length === 0) return null;
 
     const row = res.rows[0];
+    console.log(row);
     return {
       name: row.name,
       nick: row.nickname,
