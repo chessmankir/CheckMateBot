@@ -28,7 +28,7 @@ function formatWhen(ts) {
   const day = String(d.getDate()).padStart(2, '0');
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${y}-${m}-${day} ${hh}:${mm}`;
+  return `${day}-${m}-${y} ${hh}:${mm}`;
 }
 
 
@@ -57,7 +57,6 @@ module.exports = function (bot) {
   bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
     const chatId = msg.chat.id;
     // if (!isAllowedChat(chatId)) return;
-    console.log("description");
     try {
       const explicitTag = match[1] ? `@${match[1]}` : null;
       const author = msg.from;
@@ -88,6 +87,7 @@ module.exports = function (bot) {
 
       // Ключ поиска: приоритет actorId
       const key = actorId ? String(actorId) : requestedUsername;
+      console.log(key);
       const player = await getPlayerDescription(key);
 
       if (!player) {
@@ -102,16 +102,7 @@ module.exports = function (bot) {
       // что показывать в заголовке (если искали по ID — показываем ID)
       const subjectForText = actorId ? `ID ${actorId}` : requestedUsername;
 
-      let lastMsgStr = '—';
-      if (actorId) {
-        try {
-          const stats = await getUserStats(chatId, actorId);
-          lastMsgStr = formatWhen(stats.lastMsgAt);
-        } catch (e) {
-          console.error('getUserStats error:', e);
-        }
-      }
-      console.log(player);
+      
       let text = `
 🧾 Описание игрока ${escapeMarkdown(subjectForText)}:
 
@@ -123,17 +114,29 @@ module.exports = function (bot) {
       `.trim();
     const partner = await getPartner(key);
       if(partner != null){
+        
         if (partner && partner.partner_tag) {
           text += `\n❤️ Этот пользователь в отношениях с ${escapeMarkdown(partner.partner_tag)}`;
         }
 
       }
       
-      if(isAdminChat(chatId)){
+     if(isAdminChat(chatId)){
         console.log(player);
         text += `\n🏰 Клан: ${player.clan}`;
+
+        let lastMsgStr = '—';
+          try {
+            console.log(player);
+            const stats = await getUserStats(chatId, player.tgId);
+            lastMsgStr = formatWhen(stats.lastMsgAt);
+          } catch (e) {
+            console.error('getUserStats error:', e);
+          }
+        
+        
         text += `\n🕒 Последнее сообщение: ${escapeMarkdown(lastMsgStr)}`;
-      } 
+     } 
       
       text = text.trim();
       await bot.sendMessage(chatId, text, {

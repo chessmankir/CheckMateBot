@@ -20,7 +20,8 @@ module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId)
       pubgId: row.pubg_id,
       age: row.age,
       city: row.city,
-      clan: row.clan
+      clan: row.clan,
+      tgId: row.actor_id
     };
   } catch (err) {
     console.error('Ошибка при запросе из базы:', err);

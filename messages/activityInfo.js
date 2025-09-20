@@ -1,5 +1,6 @@
 // modules/cmd.activity.js
 const { getUserStats, getTopActive } = require('../handlers/activityTracker');
+const getPlayerDescription = require('./../db/getDescriptionDb');
 
 // простое экранирование для Markdown
 function esc(s) {
@@ -19,7 +20,7 @@ function formatWhen(ts) {
   const day = String(d.getDate()).padStart(2, '0');
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${y}-${m}-${day} ${hh}:${mm}`;
+  return `${day}.${m}.${y} ${hh}:${mm}`;
 }
 
 
@@ -31,47 +32,24 @@ module.exports = function (bot) {
     // 1) Кого смотрим
     let userId = msg.from.id;
     
-    let title = `Ваша активность`;
+    let title = `Активность`;
 
     // если ответ на чужое сообщение — берём адресата
-    if (msg.reply_to_message?.from?.id) {
-      userId = msg.reply_to_message.from.id;
-      if (msg.reply_to_message?.from?.id) {
-        const u = msg.reply_to_message.from;
-        userId = u.id;
+    
 
-        const name = [
-          u.first_name || '',
-          u.last_name || ''
-        ].join(' ').trim();
-
-        if (u.username) {
-          title = `Активность ${name || ''} (@${u.username})`;
-        } else {
-          title = `Активность ${name || `ID ${userId}`}`;
-        }
-      }
-
-    } else if (match[1]) {
+    if (match[1]) {
       // если указали @username — попробуем получить через getChatMember (сработает, если он есть/был в чате)
-      const uname = match[1].replace(/^@/, '');
-      try {
-        // Telegram API не даёт прямого поиска по @, обходимся кэшем чата:
-        // если бот "видит" участника — вернётся объект; иначе бросит исключение
-        const members = await bot.getChatAdministrators(chatId).catch(() => []);
-        const hitAdmin = members.find(m => (m.user.username || '').toLowerCase() === uname.toLowerCase());
-        if (hitAdmin) {
-          userId = hitAdmin.user.id;
-        } else {
-          // как вариант — можно запросить getChatMember на сам @username, но API ждёт numeric id
-          // поэтому предупредим:
-          await bot.sendMessage(chatId, `Не удалось определить ID пользователя @${uname}. Ответьте на его сообщение командой !активность или позвольте боту «увидеть» его сообщение.`, { reply_to_message_id: msg.message_id });
-          return;
-        }
-        title = `Активность @${uname}`;
-      } catch (e) {
-        await bot.sendMessage(chatId, `Не удалось определить пользователя @${uname}. Ответьте на его сообщение командой !активность.`, { reply_to_message_id: msg.message_id });
+      try{
+        const uname = match[1];
+        console.log(uname);
+        const player = await getPlayerDescription(uname);
+        console.log(player);
+        userId = player.tgId;
+      }
+      catch(e){
+       console.log('ошибка статистики');
         return;
+        
       }
     }
 

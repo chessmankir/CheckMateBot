@@ -49,11 +49,12 @@ async function recordActivity(msg, tz = 'Europe/Berlin') {
 }
 
 async function getUserStats(chatId, userId) {
+  console.log(userId);
   const { rows: totalRows } = await pool.query(
     `SELECT total_count, last_msg_at
      FROM user_activity_totals
-     WHERE chat_id = $1 AND user_id = $2`,
-    [chatId, userId]
+     WHERE user_id = $1`,
+    [userId]
   );
   const total = totalRows[0] || { total_count: 0, last_msg_at: null };
 
