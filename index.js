@@ -5,6 +5,7 @@ const { notifyChatId, threadMessageId, inviteLink1, inviteLink2 } = require('./c
 require('dotenv').config(); // Загружает переменные из .env
 const token = process.env.TELEGRAM_TOKEN; 
 
+
 const bot = new TelegramBot(token, {
   polling: {
     params: {
