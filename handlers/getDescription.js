@@ -3,6 +3,8 @@
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const getPartner = require('./../handlers/getMarriagePartner');
 const isAllowedChat = require('./../admin/permissionChats');
+const isAdminChat = require('./../admin/permissionAdminChat');
+const { getUserStats } = require('../handlers/activityTracker');
 
 function escapeMarkdown(text) {
   if (!text) return '—';
@@ -12,6 +14,23 @@ function escapeMarkdown(text) {
     .replace(/`/g, '\\`')
     .replace(/\[/g, '\\[');
 }
+
+// ★ Форматирование времени (YYYY-MM-DD HH:MM)
+function formatWhen(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+
+  // прибавляем 3 часа
+  d.setHours(d.getHours() + 3);
+
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${day} ${hh}:${mm}`;
+}
+
 
 // реальный ли реплай пользователю (а не шапке/боту/каналу)
 function isRealUserReply(msg) {
@@ -83,7 +102,16 @@ module.exports = function (bot) {
       // что показывать в заголовке (если искали по ID — показываем ID)
       const subjectForText = actorId ? `ID ${actorId}` : requestedUsername;
 
-      
+      let lastMsgStr = '—';
+      if (actorId) {
+        try {
+          const stats = await getUserStats(chatId, actorId);
+          lastMsgStr = formatWhen(stats.lastMsgAt);
+        } catch (e) {
+          console.error('getUserStats error:', e);
+        }
+      }
+      console.log(player);
       let text = `
 🧾 Описание игрока ${escapeMarkdown(subjectForText)}:
 
@@ -100,6 +128,14 @@ module.exports = function (bot) {
         }
 
       }
+      
+      if(isAdminChat(chatId)){
+        console.log(player);
+        text += `\n🏰 Клан: ${player.clan}`;
+        text += `\n🕒 Последнее сообщение: ${escapeMarkdown(lastMsgStr)}`;
+      } 
+      
+      text = text.trim();
       await bot.sendMessage(chatId, text, {
         parse_mode: 'Markdown',
         reply_to_message_id: msg.message_id,
