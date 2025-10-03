@@ -37,7 +37,14 @@ module.exports = function (bot) {
         const limit = clanLimits[clan];
         return `♟ Клан ${clan}: ${active}/${limit}`;
       });
+      
+      const total = Object.values(clanLimits).reduce((sum, v) => sum + v, 0);
+      const used = Object.keys(counts).reduce((sum, clan) => sum + (counts[clan] || 0), 0);
+      const free = total - used;
 
+      // добавляем в конец
+      lines.push(`🪑 Свободно: ${free}`);
+      lines.push(`👥 Всего: ${total}`);
       await bot.sendMessage(chatId, lines.join('\n'), {
         reply_to_message_id: msg.message_id
       });
