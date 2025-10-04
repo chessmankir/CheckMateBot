@@ -4,7 +4,7 @@ const isAdminChat = require('./../admin/permissionAdminChat');
 
 // Подключение к Postgres
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.SUPABASE_DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
@@ -31,8 +31,8 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     const mentionedUser = match[1];
     const clanNumber = parseInt(match[2]);
 
-    if (clanNumber < 1 || clanNumber > 4) {
-      return bot.sendMessage(chatId, "❌ Клан может быть только от 1 до 4", { reply_to_message_id: msg.message_id });
+    if (clanNumber < 1 || clanNumber > 5) {
+      return bot.sendMessage(chatId, "❌ Клан может быть только от 1 до 5", { reply_to_message_id: msg.message_id });
     }
 
     if (!isAdminChat(chatId)) return;
@@ -47,7 +47,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     try {
       // Обновляем клан в Postgres
       const updateRes = await pool.query(
-        `UPDATE clan_members SET clan = $1 WHERE LOWER(telegram_tag) = LOWER($2) RETURNING *;`,
+        `UPDATE public.clan_members SET clan = $1 WHERE LOWER(telegram_tag) = LOWER($2) RETURNING *;`,
         [clanNumber, targetUser]
       );
 
@@ -59,7 +59,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       const sheets = await getSheetsClient();
 
       // Удаляем пользователя из всех кланов
-      for (let i = 1; i <= 4; i++) {
+      for (let i = 1; i <= 5; i++) {
         const sheetName = `Clan${i}`;
         const sheetId = await getSheetIdByName(sheets, SPREADSHEET_ID, sheetName);
         if (!sheetId) continue;

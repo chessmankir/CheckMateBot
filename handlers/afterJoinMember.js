@@ -5,7 +5,8 @@ const admins = [
   '@nurka7',
   '@chessmankir',
   '@winepubg',
-  '@eric_burgundy'
+  '@reqwil',
+  '@ERROR_4002'
 ];
 
 // Экранирование для classic Markdown (Telegram parse_mode: 'Markdown')

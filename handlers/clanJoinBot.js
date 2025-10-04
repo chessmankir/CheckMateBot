@@ -256,7 +256,8 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
           '🎉 Ты принят в клан! Добро пожаловать в клан CheckMate♟️'
         );
 
-        if (Number(dataToSave.clan) === 1 || Number(dataToSave.clan) === 2) {
+        if (Number(dataToSave.clan) === 1 || Number(dataToSave.clan) === 2 || 
+            Number(dataToSave.clan) === 5) {
           await bot.sendMessage(chatId, inviteLink1);
         } else {
           await bot.sendMessage(chatId, inviteLink2);

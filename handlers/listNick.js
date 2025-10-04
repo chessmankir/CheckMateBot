@@ -2,7 +2,7 @@
 const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
 
-const clanLimits = { 1: 50, 2: 55, 3: 60, 4: 35 };
+const clanLimits = { 1: 55, 2: 60, 3: 60, 4: 40 };
 
 // ID чатов
 const CHAT_12 = -1002549710535; // показывать кланы 1 и 2
