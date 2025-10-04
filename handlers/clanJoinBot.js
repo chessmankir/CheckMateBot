@@ -244,6 +244,8 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
         actor_id: userId,
         date: 0
       };
+      console.log(dataToSave);
+      
       try {
         await saveDescription(dataToSave);
         await db.query('UPDATE invites SET is_active = false WHERE invite_code = $1', [

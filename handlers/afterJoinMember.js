@@ -41,7 +41,7 @@ module.exports = function (bot) {
         const clan = Number(memberRes.rows[0].clan);
 
         // валидные только 1..4
-        if (!(clan >= 1 && clan <= 4)) {
+        if (!(clan >= 1 && clan <= 5)) {
           return;
         }
 
