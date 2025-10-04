@@ -39,9 +39,10 @@ module.exports = function (bot) {
         return `♟ Клан ${clan}: ${active}/${limit}`;
       });
       
-      const total = Object.values(clanLimits).reduce((sum, v) => sum + v, 0);
+      const total = Object.values(counts).reduce((sum, v) => sum + v, 0);
+      const alltotal = Object.values(clanLimits).reduce((sum, v) => sum + v, 0);
       const used = Object.keys(counts).reduce((sum, clan) => sum + (counts[clan] || 0), 0);
-      const free = total - used;
+      const free = alltotal - used;
 
       // добавляем в конец
       lines.push(`🪑 Свободно: ${free}`);
