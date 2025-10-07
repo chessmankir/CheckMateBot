@@ -66,7 +66,7 @@ module.exports = function (bot) {
           // молча пропускаем, если закрыты ЛС
         }
 
-        const welcomeMessage1 = `Для вступелния в клан в игре найдите профиль лидера клана и подайте заявку`;
+        const welcomeMessage1 = `Для вступелния в клан в игре найдите профиль лидера клана и подайте заявку. Опиание вашего лидера клана ниже`;
         try {
           await bot.sendMessage(actorId, escapeMd(welcomeMessage1), { parse_mode: 'Markdown' });
         } catch (e) {}
@@ -92,7 +92,7 @@ module.exports = function (bot) {
           const IMAGES_DIR = path.join(__dirname, '..', 'Images');   // NEW
           const steps = [                                            // NEW
             { file: path.join(IMAGES_DIR, 'IMG_5208.PNG'), caption: 'Вам необходимо найти лидера своего клана в игре. ID выше' },
-            { file: path.join(IMAGES_DIR, 'IMG_5207.PNG'), caption: 'Слева в профиле увидеть клан и кликнуть на него' },
+            { file: path.join(IMAGES_DIR, 'IMG_5218.PNG'), caption: 'Слева в профиле увидеть клан и кликнуть на него' },
             { file: path.join(IMAGES_DIR, 'IMG_5209.PNG'), caption: 'Бросить запрос в клан' },
           ];
           // В ЛС лучше слать по одному — подписи гарантированно видны
