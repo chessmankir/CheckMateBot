@@ -81,7 +81,27 @@ module.exports = function (bot) {
 
         try {
           await bot.sendMessage(actorId, response.trim(), { parse_mode: 'Markdown' });
+          const response1 = `Пожалуйста, подайте заявку в клан в игре. Как подать заявку в клан?`;
+          await bot.sendMessage(actorId, response1.trim(), { parse_mode: 'Markdown' });
         } catch (e) {}
+
+        try{
+          // 3) КАРТИНКИ (между описанием и командами)                // NEW
+          // Папка Images рядом с папкой handlers (скрин у тебя такой)
+          const IMAGES_DIR = path.join(__dirname, '..', 'Images');   // NEW
+          const steps = [                                            // NEW
+            { file: path.join(IMAGES_DIR, 'IMG_5208.PNG'), caption: 'Вам необходимо найти лидера своего клана в игре. ID выше' },
+            { file: path.join(IMAGES_DIR, 'IMG_5207.PNG'), caption: 'Слева в профиле увидеть клан и кликнуть на него' },
+            { file: path.join(IMAGES_DIR, 'IMG_5209.PNG'), caption: 'Бросить запрос в клан' },
+          ];
+          // В ЛС лучше слать по одному — подписи гарантированно видны
+          for (const s of steps) {
+            try { await bot.sendPhoto(actorId, s.file, { caption: s.caption }); } catch {}
+          }
+        }
+        catch (e){
+          
+        }
 
 
         const commandText = `
