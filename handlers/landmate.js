@@ -68,6 +68,7 @@ module.exports = function (bot) {
         cross join me m
         where cm.telegram_tag is not null
           and cm.telegram_tag <> m.my_tag
+          and cm.active = TRUE
           and earth_box(ll_to_earth(m.tlat, m.tlon), $4) @> ll_to_earth(cc.lat, cc.lon)
           and earth_distance(ll_to_earth(m.tlat, m.tlon), ll_to_earth(cc.lat, cc.lon)) <= $4
         group by cm.telegram_tag, cm.city, cc.lat, cc.lon, m.tlat, m.tlon

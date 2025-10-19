@@ -31,6 +31,9 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
           ],
           [
             { text: 'Хочешь вступить в клан?', callback_data: 'join_clan' }
+          ],
+          [
+            { text: '🛠 Зарегистрировать клан', callback_data: 'register_clan' }
           ]
         ]
       }
