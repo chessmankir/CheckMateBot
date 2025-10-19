@@ -108,7 +108,7 @@ module.exports = function registerClanWizard(bot) {
   });
 
   // ===== 3) Привязка АДМИН-ЧАТА (одного) =====
-  bot.onText(/^\/bind_admin$/i, async (msg) => {
+ bot.onText(/^!привязать\s+админку$/iu, async (msg) => {
     if (msg.chat.type === 'private') {
       return bot.sendMessage(msg.chat.id, 'Команду нужно писать в админ-чате клана.');
     }
@@ -146,7 +146,7 @@ module.exports = function registerClanWizard(bot) {
   });
 
   // ===== 4) Привязка ОБЫЧНОГО чата (много на клан) =====
-  bot.onText(/^\/bind_member$/i, async (msg) => {
+    bot.onText(/^!привязать\s+чат$/iu, async (msg) => {
     if (msg.chat.type === 'private') {
       return bot.sendMessage(msg.chat.id, 'Команду нужно писать в групповом чате клана.');
     }
@@ -174,7 +174,7 @@ module.exports = function registerClanWizard(bot) {
         [clanId, chatId]
       );
 
-      await bot.sendMessage(chatId, `✅ Чат привязан к чату.`, { parse_mode: 'Markdown' });
+      await bot.sendMessage(chatId, `✅ Чат привязан к клану.`, { parse_mode: 'Markdown' });
     } catch (e) {
       console.error('bind_member error', e);
       bot.sendMessage(chatId, '❌ Не удалось привязать чат.');
