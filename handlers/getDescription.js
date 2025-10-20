@@ -90,17 +90,14 @@ module.exports = function (bot) {
       const key = actorId ? String(actorId) : requestedUsername;
       console.log(key);
       const player = await getPlayerDescription(key);
-    /*  const clanId = await getClanId(chatId);
-      console.log(clanId);
-      console.log('cland');
-      if(player.clan_id != clanId){
-        console.log('no equal');
+      const clanId = await getClanId(chatId);
+      if(player.clanId != clanId){
         return bot.sendMessage(
           chatId,
           `❌ Описание не найдено.`,
           { reply_to_message_id: msg.message_id }
         );
-      }*/
+      }
 
       if (!player) {
         return bot.sendMessage(
@@ -116,7 +113,7 @@ module.exports = function (bot) {
 
       
       let text = `
-🧾 Описание игрока ${escapeMarkdown(subjectForText)}:
+🧾 Описание игрока :
 
 👤 Имя: ${escapeMarkdown(player.name)}
 🏷 Ник: ${escapeMarkdown(player.nick)}
