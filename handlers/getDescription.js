@@ -90,7 +90,7 @@ module.exports = function (bot) {
       const key = actorId ? String(actorId) : requestedUsername;
       console.log(key);
       const player = await getPlayerDescription(key);
-      const clanId = await getClanId(db, chatId);
+      const clanId = await getClanId(chatId);
       console.log(clanId);
       console.log('cland');
       if(player.clan_id != clanId){
