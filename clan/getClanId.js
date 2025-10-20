@@ -17,14 +17,14 @@ module.exports = async function (chatId) {
     }
 
     // 2️⃣ Если не найдено — проверяем в clan_members_chats
-   /* const memberChatRes = await db.query(
+    const memberChatRes = await db.query(
       `SELECT clan_id
-         FROM public.clan_members_chats
+         FROM public.clan_member_chats
         WHERE chat_id = $1
         LIMIT 1`,
       [chatId]
     );
-*/
+
     if (memberChatRes.rowCount > 0) {
       return memberChatRes.rows[0].clan_id;
     }
