@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
 const isAdminChat = require('../admin/permissionAdminChat');
+const getClanId = require('../clan/getClanId');
 
 function generateCode() {
   return 'CLAN-' + Math.floor(100000 + Math.random() * 900000);
@@ -20,11 +21,12 @@ module.exports = function(bot) {
     }
 
     const inviteCode = generateCode();
+    const clanId = await getClanId(chatId);
 
     try {
       await db.query(
-        'INSERT INTO invites (id, invite_code, is_active, clan_name) VALUES ($1, $2, $3, $4)',
-        [uuidv4(), inviteCode, true, clanNumber]
+        'INSERT INTO invites (id, invite_code, is_active, clan_name, clan_id) VALUES ($1, $2, $3, $4, $5)',
+        [uuidv4(), inviteCode, true, clanNumber, clanId]
       );
 
       bot.sendMessage(msg.chat.id, `🎟️ Инвайт-код для клана №${clanNumber}:`, {
