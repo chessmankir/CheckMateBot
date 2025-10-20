@@ -1,7 +1,7 @@
 // modules/cmd.places.js
 const db = require('../handlers/db');
 const isAllowedChat = require('../admin/permissionChats');
-
+const getClanId = require('../clan/getClanId');
 
 // Текущие лимиты кланов
 const clanLimits = {
@@ -15,15 +15,22 @@ const clanLimits = {
 module.exports = function (bot) {
   bot.onText(/^!места$/iu, async (msg) => {
     const chatId = msg.chat.id;
-    // if (!isAllowedChat(chatId)) return;
+  //  if (!isAllowedChat(chatId)) return;
 
     try {
-      // Считаем активных по каждому клану
+      // Считаем активных по каждому клан
+      
+      const clanId = await getClanId(chatId );
+      console.log('success');
+      console.log(clanId);
+      // 2) Считаем активных по каждому ВНУТРЕННЕМУ клану внутри этого clan_id
       const res = await db.query(
         `SELECT clan, COUNT(*)::int AS count
-         FROM public.clan_members
-         WHERE active = TRUE
-         GROUP BY clan`
+           FROM public.clan_members
+          WHERE active = TRUE
+            AND clan_id = $1
+          GROUP BY clan`,
+        [clanId]
       );
 
       // Перегоняем в map

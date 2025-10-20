@@ -1,6 +1,7 @@
 const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
 const isAdminChat = require('../admin/permissionAdminChat');
+const getClanId = require('../clan/getClanId');
 
 const clanLimits = {
   1: 55,
@@ -25,9 +26,12 @@ module.exports = function (bot) {
     }
 
     try { 
+      console.log("before");
+      const clanId = await getClanId( chatId);
+      console.log(clanId);
       const res = await db.query(
-        'SELECT telegram_tag, nickname, created_at FROM clan_members WHERE clan = $1 AND active = TRUE ORDER BY telegram_tag',
-        [clanNumber]
+        'SELECT telegram_tag, nickname, created_at FROM clan_members WHERE clan = $1 AND active = TRUE AND clan_id = $2 ORDER BY telegram_tag',
+        [clanNumber, clanId]
       );
 
       if (res.rows.length === 0) {
@@ -64,13 +68,16 @@ module.exports = function (bot) {
   });
 
   // !полныйсписок — всех участников
-  bot.onText(/!полныйсписок/, async (msg) => {
+  bot.onText(/!2список/, async (msg) => {
     const chatId = msg.chat.id;
     if (!isAllowedChat(chatId)) return;
 
     try {
+      const clanId = await getClanId( chatId);
+      console.log('success');
+      console.log(clanId);
       const res = await db.query(
-        'SELECT telegram_tag, clan FROM clan_members WHERE active = TRUE ORDER BY clan, telegram_tag'
+        'SELECT telegram_tag, clan FROM clan_members WHERE active = TRUE AND clan_id = $1 ORDER BY clan, telegram_tag',   [ clanId]
       );
 
       if (res.rows.length === 0) {

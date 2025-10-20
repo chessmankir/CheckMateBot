@@ -5,6 +5,7 @@ const getPartner = require('./../handlers/getMarriagePartner');
 const isAllowedChat = require('./../admin/permissionChats');
 const isAdminChat = require('./../admin/permissionAdminChat');
 const { getUserStats } = require('../handlers/activityTracker');
+const getClanId = require('../clan/getClanId');
 
 function escapeMarkdown(text) {
   if (!text) return '—';
@@ -89,6 +90,17 @@ module.exports = function (bot) {
       const key = actorId ? String(actorId) : requestedUsername;
       console.log(key);
       const player = await getPlayerDescription(key);
+      const clanId = await getClanId(db, chatId);
+      console.log(clanId);
+      console.log('cland');
+      if(player.clan_id != clanId){
+        console.log('no equal');
+        return bot.sendMessage(
+          chatId,
+          `❌ Описание не найдено.`,
+          { reply_to_message_id: msg.message_id }
+        );
+      }
 
       if (!player) {
         return bot.sendMessage(
