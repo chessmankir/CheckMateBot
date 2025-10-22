@@ -14,9 +14,7 @@ module.exports = async function (chatId) {
     if (clanRes.rowCount > 0) {
       return true;
     }
-
-    // 2️⃣ Если не найдено — проверяем в clan_members_chats
-    
+    return false;
 
   } catch (err) {
     console.error('❌ Ошибка при получении id клана:', err);
