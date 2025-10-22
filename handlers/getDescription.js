@@ -67,15 +67,12 @@ module.exports = function (bot) {
 
       // 1) Явный @ всегда можно указать
       if (explicitTag) {
-        console.log('explicitTag');
         requestedUsername = explicitTag;
       } else if (isRealUserReply(msg)) {
-        console.log('isRealUserReply');
         // 2) Реальный реплай — берём id адресата
         actorId = msg.reply_to_message.from.id;
       } else {
         // 3) Реплая нет — берём автора команды
-        console.log('actor');
         actorId = author?.id ?? null;
       }
       if (!requestedUsername && !actorId) {
@@ -130,13 +127,10 @@ module.exports = function (bot) {
         }
 
       }
-      
-     if(isAdminChat(chatId)){
+     if(await isAdminChat(chatId)){
         text += `\n🏰 Клан: ${player.clan}`;
-
         let lastMsgStr = '—';
           try {
-            console.log(player);
             const stats = await getUserStats(chatId, player.tgId);
             lastMsgStr = formatWhen(stats.lastMsgAt);
           } catch (e) {
