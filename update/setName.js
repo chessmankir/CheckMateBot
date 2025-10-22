@@ -2,6 +2,7 @@ const { Pool } = require("pg");
 const isAdminChat = require("./../admin/permissionAdminChat");
 const getPlayerDescription = require("./../db/getDescriptionDb");
 const { google } = require("googleapis");
+const getClanId = require('../clan/getClanId');
 
 // ===== Настройка индекса колонки "Имя" в Google Sheets =====
 const NAME_COL_INDEX = 0;
@@ -86,6 +87,10 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
         );
       }
 
+      const clanId = await getClanId(chatId);
+      if(clanId){
+
+
       // --- Обновляем в Google Sheets ---
       // ищем строку по тегу (как в +ник), меняем колонку имени
       const sheets = await getSheets();
@@ -117,7 +122,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
           resource: { values: rows },
         });
       }
-
+      }
       await bot.sendMessage(
         chatId,
         `✅ Имя для ${targetTag} обновлено: ${newName}`,

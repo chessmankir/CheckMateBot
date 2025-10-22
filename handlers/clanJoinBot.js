@@ -195,9 +195,9 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
           '❌ Код недействителен или уже использован. Введи снова:'
         );
       }
-
       user.data.inviteCode = code;
       user.data.clan = res.rows[0].clan_name;
+      user.data.clanId = res.rows[0].clan_id;
       user.step = 'pubg_id';
       return bot.sendMessage(chatId, '✅ Код принят. Введи свой PUBG ID:');
     }
@@ -245,17 +245,18 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
         city: user.data.city,
         clan: user.data.clan,
         actor_id: userId,
-        date: 0
+        date: 0, 
+        clan_id: user.data.clanId
       };
+      console.log('save');
       console.log(dataToSave);
-      
+
       try {
-        await saveDescription(dataToSave);
+        await saveMemberDb(dataToSave);
         await db.query('UPDATE invites SET is_active = false WHERE invite_code = $1', [
           user.data.inviteCode
         ]);
-        await saveMemberDb(dataToSave);
-
+        
         await bot.sendMessage(
           chatId,
           '🎉 Ты принят в клан! Добро пожаловать в клан CheckMate♟️'
@@ -267,6 +268,11 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
         } else {
           await bot.sendMessage(chatId, inviteLink2);
         }
+        
+        if(user.data.clanId == 1){
+          await saveDescription(dataToSave);
+        }
+        
       } catch (err) {
         console.error('❌ Ошибка при приёме в клан:', err);
         await bot.sendMessage(

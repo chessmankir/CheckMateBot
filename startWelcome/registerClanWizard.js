@@ -48,13 +48,16 @@ module.exports = function registerClanWizard(bot) {
 
     // 2.2 Проверочный код
     if (s.step === 'ask_code') {
-      const code = normText(msg.text);
-      if (!code || code !== FALLBACK_CODE) {
+      const code = normDigits(msg.text);             // оставляем только цифры
+      const expected = normDigits(FALLBACK_CODE);    // '417' → '417'
+      if (code !== expected) {
         return bot.sendMessage(msg.chat.id, 'Код неверный. Проверьте и попробуйте ещё раз.');
       }
       s.step = 'ask_leader_name';
+      wizardState.set(userId, s);                    // явно сохраняем состояние
       return bot.sendMessage(msg.chat.id, '👤 Введите имя (как зовут).');
     }
+
 
     // 2.3 Имя лидера
     if (s.step === 'ask_leader_name') {

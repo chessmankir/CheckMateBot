@@ -11,7 +11,6 @@ module.exports = async function (chatId) {
         LIMIT 1`,
       [chatId]
     );
-
     if (clanRes.rowCount > 0) {
       return clanRes.rows[0].clan_id;
     }

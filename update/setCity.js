@@ -3,6 +3,7 @@ const { Pool } = require("pg");
 const isAdminChat = require("./../admin/permissionAdminChat");
 const getPlayerDescription = require("./../db/getDescriptionDb");
 const { google } = require("googleapis");
+const getClanId = require('../clan/getClanId');
 
 // ===== Индексы столбцов в Google Sheets =====
 // Город
@@ -86,6 +87,9 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
         await pool.query(`UPDATE clan_members SET city = $1 WHERE lower(telegram_tag) = lower($2)`, [newCity, targetTag]);
       }
 
+      const clanId = await getClanId(chatId);
+      if(clanId){
+
       // --- Google Sheets: обновим строку по тегу ---
       const sheets = await getSheets();
       const range = "Clan" + player.clan; // как у тебя в +ник
@@ -109,6 +113,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
           valueInputOption: "RAW",
           resource: { values: rows },
         });
+      }
       }
 
       await bot.sendMessage(

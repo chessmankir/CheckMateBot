@@ -1,6 +1,7 @@
 const { Pool } = require("pg");
 const { google } = require("googleapis");
 const isAdminChat = require('./../admin/permissionAdminChat');
+const getClanId = require('../clan/getClanId');
 
 // Подключение к Postgres
 const pool = new Pool({
@@ -55,11 +56,14 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
         return bot.sendMessage(chatId, "❌ Пользователь не найден в базе", { reply_to_message_id: msg.message_id });
       }
 
-      const userData = updateRes.rows[0];
-      const sheets = await getSheetsClient();
+      const clanId = await getClanId(chatId);
+      if(clanId){
+
+        const userData = updateRes.rows[0];
+        const sheets = await getSheetsClient();
 
       // Удаляем пользователя из всех кланов
-      for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 5; i++) {
         const sheetName = `Clan${i}`;
         const sheetId = await getSheetIdByName(sheets, SPREADSHEET_ID, sheetName);
         if (!sheetId) continue;
@@ -88,7 +92,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       }
 
       // Добавляем в новый клан
-      await sheets.spreadsheets.values.append({
+        await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
         range: `Clan${clanNumber}`,
         valueInputOption: "RAW",
@@ -108,7 +112,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
          ]
         }
       });
-
+      }
       bot.sendMessage(chatId, `✅ Пользователь ${targetUser} теперь в клане ${clanNumber}`, { reply_to_message_id: msg.message_id });
 
     } catch (err) {

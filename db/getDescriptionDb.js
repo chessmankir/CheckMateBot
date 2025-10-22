@@ -14,7 +14,6 @@ module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId)
     if (res.rows.length === 0) return null;
 
     const row = res.rows[0];
-    console.log(row);
     return {
       name: row.name,
       nick: row.nickname,
@@ -23,7 +22,8 @@ module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId)
       city: row.city,
       clan: row.clan,
       tgId: row.actor_id,
-      clanId: row.clan_id
+      clanId: row.clan_id,
+      active: row.active
     };
   } catch (err) {
     console.error('Ошибка при запросе из базы:', err);

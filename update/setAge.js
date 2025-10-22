@@ -3,6 +3,7 @@ const { Pool } = require("pg");
 const isAdminChat = require("./../admin/permissionAdminChat");
 const getPlayerDescription = require("./../db/getDescriptionDb");
 const { google } = require("googleapis");
+const getClanId = require('../clan/getClanId');
 
 // ===== Индексы столбцов в Google Sheets =====
 // Возраст: поставь индекс колонки (A=0, B=1, C=2, ...). Например, D => 3.
@@ -43,7 +44,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     const age = ageStr ? parseInt(ageStr, 10) : NaN;
 
     if (!ageStr || Number.isNaN(age)) {
-      return bot.sendMessage(chatId, "❌ Укажи возраст: `+возраст 18` или `+возраст @user 18`.", {
+      return bot.sendMessage(chatId, "❌ Укажи возраст: `+возраст 18`.", {
         reply_to_message_id: msg.message_id,
       });
     }
@@ -80,6 +81,9 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
         await pool.query(`UPDATE clan_members SET age = $1 WHERE lower(telegram_tag) = lower($2)`, [age, targetTag]);
       }
 
+      const clanId = await getClanId(chatId);
+      if(clanId){
+      
       // --- Google Sheets: обновим строку по тегу ---
       const sheets = await getSheets();
       const range = "Clan" + player.clan; // как у тебя в +ник
@@ -103,6 +107,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
           valueInputOption: "RAW",
           resource: { values: rows },
         });
+      }
       }
 
       await bot.sendMessage(chatId, `✅ Возраст для ${targetTag} обновлён: ${age}`, {

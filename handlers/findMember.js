@@ -1,6 +1,31 @@
 const db = require('../handlers/db'); // путь к подключению к базе
 const isAllowedChat = require('../admin/permissionChats');
 const isAdminChat = require('../admin/permissionAdminChat');
+const { getUserStats } = require('../handlers/activityTracker');
+
+function escapeMarkdown(text) {
+  if (!text) return '—';
+  return text
+    .replace(/_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/`/g, '\\`')
+    .replace(/\[/g, '\\[');
+}
+
+function formatWhen(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+
+  // прибавляем 3 часа
+  d.setHours(d.getHours() + 3);
+
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${day}-${m}-${y} ${hh}:${mm}`;
+}
 
 module.exports = function (bot) {
   bot.onText(/!поиск\s+(.+)/i, async (msg, match) => {
@@ -27,7 +52,7 @@ module.exports = function (bot) {
 
       const user = res.rows[0];
 
-      const message = `
+      let message = `
 📄 Найден участник: ${user.telegram_tag || '(нет тега)'}
 
 👤 Имя: ${user.name || '(нет имени)'}
@@ -38,6 +63,16 @@ module.exports = function (bot) {
 🏰 Клан: ${user.clan || '(не указан)'}
       `.trim();
 
+      let lastMsgStr = '—';
+      try {
+        const stats = await getUserStats(chatId, user.tgId);
+        lastMsgStr = formatWhen(stats.lastMsgAt);
+      } catch (e) {
+        console.error('getUserStats error:', e);
+      }
+      
+      message += `\n🕒 Последнее сообщение: ${escapeMarkdown(lastMsgStr)}`;
+      message += '\n' + (user.active ? "✅ В клане." : "⛔ Забанен.");
       bot.sendMessage(chatId, message, {
         reply_to_message_id: msg.message_id
       });

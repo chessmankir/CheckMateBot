@@ -58,6 +58,7 @@ require('./handlers/infoPlaces')(bot);
 const marryProposal = require('./handlers/marriageProposal');
 marryProposal(bot);
 require('./handlers/divorce')(bot);
+require('./clan/createSubClan')(bot);
 
 require('./update/setAge')(bot, auth, SPREADSHEET_ID);
 require('./update/setCity')(bot, auth, SPREADSHEET_ID);

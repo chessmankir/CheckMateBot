@@ -90,14 +90,14 @@ module.exports = function (bot) {
       const key = actorId ? String(actorId) : requestedUsername;
       console.log(key);
       const player = await getPlayerDescription(key);
-     /* const clanId = await getClanId(chatId);
+      const clanId = await getClanId(chatId);
       if(player.clanId != clanId){
         return bot.sendMessage(
           chatId,
           `❌ Описание не найдено.`,
           { reply_to_message_id: msg.message_id }
         );
-      }*/
+      }
 
       if (!player) {
         return bot.sendMessage(
@@ -120,7 +120,8 @@ module.exports = function (bot) {
 🎮 PUBG ID: \`${escapeMarkdown(pubgId) || '—'}\`
 🎂 Возраст: ${escapeMarkdown(player.age)}
 📍 Город: ${escapeMarkdown(player.city)}
-      `.trim();
+      `.trim();  
+      
     const partner = await getPartner(key);
       if(partner != null){
         
@@ -131,7 +132,6 @@ module.exports = function (bot) {
       }
       
      if(isAdminChat(chatId)){
-        console.log(player);
         text += `\n🏰 Клан: ${player.clan}`;
 
         let lastMsgStr = '—';
@@ -145,6 +145,7 @@ module.exports = function (bot) {
         
         
         text += `\n🕒 Последнее сообщение: ${escapeMarkdown(lastMsgStr)}`;
+        text += `\n` + ( player.active ?  "✅ В клане." : "⛔ Забанен.");
      } 
       
       text = text.trim();

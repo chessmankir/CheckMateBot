@@ -2,6 +2,7 @@ const { Pool } = require("pg");
 const isAdminChat = require('./../admin/permissionAdminChat');
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const { google } = require("googleapis");
+const getClanId = require('../clan/getClanId');
 
 // Подключение к Postgres
 const pool = new Pool({
@@ -56,6 +57,9 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
         [newNickname, targetTag]
       );
 
+      const clanId = await getClanId(chatId);
+      if(clanId){
+
       const sheets = await getSheets();
       const range = "Clan" + player.clan;
       const res = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range });
@@ -76,7 +80,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
           resource: { values: rows }
         });
       }
-
+      }
       bot.sendMessage(
         chatId,
         `✅ Ник для ${targetTag} обновлён: ${newNickname}`,

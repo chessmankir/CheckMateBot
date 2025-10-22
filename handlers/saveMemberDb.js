@@ -10,7 +10,8 @@ async function saveMemberDb(data) {
     pubg_id,
     city,
     clan,
-    actor_id
+    actor_id,
+    clan_id
   } = data;
 
   const client = await pool.connect();
@@ -28,9 +29,9 @@ async function saveMemberDb(data) {
       await client.query(
         `UPDATE public.clan_members
          SET name = $1, nickname = $2, telegram_tag = $3, age = $4,
-             pubg_id = $5, city = $6, clan = $7, created_at = $8
+             pubg_id = $5, city = $6, clan = $7, created_at = $8, clan_id = $10
          WHERE actor_id = $9`,
-        [name, nick, target_username, age, pubg_id, city, clan, now, actor_id]
+        [name, nick, target_username, age, pubg_id, city, clan, now, actor_id, clan_id]
       );
       return { status: 'updated_by_actor_id' };
     }
@@ -45,9 +46,9 @@ async function saveMemberDb(data) {
       // 🔁 Обновляем по тегу
       await client.query(
         `UPDATE public.clan_members
-         SET name = $1, nickname = $2, age = $3, pubg_id = $4, city = $5, clan = $6, created_at = $7, actor_id = $8
+         SET name = $1, nickname = $2, age = $3, pubg_id = $4, city = $5, clan = $6, created_at = $7, actor_id = $8, clan_id = $10
          WHERE telegram_tag = $9`,
-        [name, nick, age, pubg_id, city, clan, now, actor_id, target_username]
+        [name, nick, age, pubg_id, city, clan, now, actor_id, target_username, clan_id]
       );
       return { status: 'updated_by_tag' };
     }
@@ -55,11 +56,12 @@ async function saveMemberDb(data) {
     // 3. Если не найдено — создаём нового
     await client.query(
       `INSERT INTO public.clan_members 
-        (name, nickname, telegram_tag, age, pubg_id, city, clan, created_at, actor_id, active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE)`,
-      [name, nick, target_username, age, pubg_id, city, clan, now, actor_id]
+  (name, nickname, telegram_tag, age, pubg_id, city, clan, created_at, actor_id, clan_id, active)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE)
+`,
+      [name, nick, target_username, age, pubg_id, city, clan, now, actor_id, clan_id]
     );
-
+     console.log(clan_id);
     return { status: 'created' };
 
   } catch (error) {
