@@ -55,7 +55,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       });
     }
 
-    if (isAdminCommand && !isAdminChat(chatId)) {
+    if (isAdminCommand && !await isAdminChat(chatId)) {
       return; // как в +ник — тихо выходим
     }
 

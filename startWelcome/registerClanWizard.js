@@ -1,5 +1,6 @@
 // modules/registerClanWizard.js
 const db = require('../handlers/db');
+const createSubclan = require('../clan/createSubClanDb');
 
 const FALLBACK_CODE = process.env.CLAN_VERIFY_CODE || '417';
 const wizardState = new Map();
@@ -42,6 +43,13 @@ module.exports = function registerClanWizard(bot) {
       const name = normText(msg.text);
       if (!name) return bot.sendMessage(msg.chat.id, 'Введите название.');
       p.clan_name = name;
+      s.step = 'ask_chat_link';
+      return bot.sendMessage(msg.chat.id, '✅ Введите ссылку приглашения в чат клана.');
+    }
+
+    if (s.step === 'ask_chat_link') {
+      const link = normText(msg.text);
+      p.clan_link = link;
       s.step = 'ask_code';
       return bot.sendMessage(msg.chat.id, '✅ Введите проверочный код.');
     }
@@ -123,16 +131,16 @@ module.exports = function registerClanWizard(bot) {
             `Сначала деактивируйте его, чтобы создать новый.`
           );
         }
-
+        
         await db.query('BEGIN');
 
         // (B) создаём клан
         const insClan = await db.query(
-          `INSERT INTO clans (name, owner_actor_id, is_active)
-           VALUES ($1, $2, TRUE)
+          `INSERT INTO clans (name, owner_actor_id, is_active, invite_link)
+           VALUES ($1, $2, TRUE, $3)
            ON CONFLICT (name) DO NOTHING
            RETURNING id`,
-          [clanName, userId]
+          [clanName, userId, p.clan_link]
         );
         if (insClan.rowCount === 0) {
           await db.query('ROLLBACK');
@@ -168,6 +176,13 @@ module.exports = function registerClanWizard(bot) {
           ]
         );
 
+        const insertRes = await db.query(
+          `INSERT INTO public.subclans (clan_id, leader_actor_id, invite_link, member_limit, number)
+           VALUES ($1, $2, $3, $4, 1)
+           RETURNING id, clan_id, leader_actor_id, invite_link, member_limit, active, created_at, updated_at`,
+          [clanId, userId, p.clan_link, 60]
+        );
+  
         await db.query('COMMIT');
 
         await bot.sendMessage(
@@ -198,80 +213,5 @@ module.exports = function registerClanWizard(bot) {
       }
     }
   });
-
-  // ===== 3) Привязка АДМИН-ЧАТА (одного) =====
-  // команда: !привязать админку
-  bot.onText(/^!привязать\s+админку$/iu, async (msg) => {
-    if (msg.chat.type === 'private') {
-      return bot.sendMessage(msg.chat.id, 'Команду нужно писать в админ-чате клана.');
-    }
-
-    const adminChatId = msg.chat.id;
-    const ownerId = msg.from.id;
-
-    try {
-      const { rows } = await db.query(
-        `SELECT id FROM clans WHERE owner_actor_id = $1 AND is_active = TRUE LIMIT 1`,
-        [ownerId]
-      );
-      if (!rows.length) {
-        return bot.sendMessage(adminChatId, 'Сначала зарегистрируйте клан в личке бота.');
-      }
-
-      const clanId = rows[0].id;
-
-      await db.query(
-        `UPDATE clans
-            SET admin_chat_id = $1
-          WHERE id = $2`,
-        [adminChatId, clanId]
-      );
-
-      await bot.sendMessage(
-        adminChatId,
-        `✅ Этот чат закреплён как *админ-чат* клана #${clanId}.`,
-        { parse_mode: 'Markdown' }
-      );
-    } catch (e) {
-      console.error('bind_admin error', e);
-      bot.sendMessage(adminChatId, '❌ Не удалось привязать админ-чат.');
-    }
-  });
-
-  // ===== 4) Привязка ОБЫЧНОГО чата (много на клан) =====
-  // команда: !привязать чат
-  bot.onText(/^!привязать\s+чат$/iu, async (msg) => {
-    if (msg.chat.type === 'private') {
-      return bot.sendMessage(msg.chat.id, 'Команду нужно писать в групповом чате клана.');
-    }
-
-    const chatId = msg.chat.id;
-    const ownerId = msg.from.id;
-
-    try {
-      const { rows } = await db.query(
-        `SELECT id FROM clans WHERE owner_actor_id = $1 AND is_active = TRUE LIMIT 1`,
-        [ownerId]
-      );
-      if (!rows.length) {
-        return bot.sendMessage(chatId, 'Сначала зарегистрируйте клан в личке бота.');
-      }
-
-      const clanId = rows[0].id;
-
-      await db.query(
-        `INSERT INTO clan_member_chats (clan_id, chat_id, active)
-         VALUES ($1, $2, TRUE)
-         ON CONFLICT (chat_id) DO UPDATE
-           SET clan_id = EXCLUDED.clan_id,
-               active = TRUE`,
-        [clanId, chatId]
-      );
-
-      await bot.sendMessage(chatId, `✅ Чат привязан к клану.`, { parse_mode: 'Markdown' });
-    } catch (e) {
-      console.error('bind_member error', e);
-      bot.sendMessage(chatId, '❌ Не удалось привязать чат.');
-    }
-  });
+  
 };

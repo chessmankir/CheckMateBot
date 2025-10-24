@@ -85,7 +85,6 @@ module.exports = function (bot) {
 
       // Ключ поиска: приоритет actorId
       const key = actorId ? String(actorId) : requestedUsername;
-      console.log(key);
       const player = await getPlayerDescription(key);
       const clanId = await getClanId(chatId);
       if(player.clanId != clanId){

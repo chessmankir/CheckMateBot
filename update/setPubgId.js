@@ -10,17 +10,8 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-// Авторизация Google Sheets
-async function getSheets() {
-  const auth = new google.auth.GoogleAuth({
-    credentials: JSON.parse(process.env.GOOGLE_SERVICE_JSON),
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  });
-  return google.sheets({ version: "v4", auth });
-}
-
 module.exports = function (bot, auth, SPREADSHEET_ID) {
-  bot.onText(/^\+ник(?:\s+@(\S+)\s+(.+)|\s+(.+))?$/, async (msg, match) => {
+  bot.onText(/^\+id(?:\s+@(\S+)\s+(.+)|\s+(.+))?$/, async (msg, match) => {
     const chatId = msg.chat.id;
     const fromUser = msg.from.username ? `@${msg.from.username}` : null;
 
@@ -33,7 +24,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     if (!targetTag.startsWith('@')) {
       targetTag = '@' + targetTag;
     }
-    const newNickname = match[2] || match[3];
+    const newPubgId = match[2] || match[3];
 
     if (!newNickname) {
       return bot.sendMessage(chatId, "❌ Укажи ник после команды `+ник`.", { reply_to_message_id: msg.message_id });
@@ -48,42 +39,17 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     if (!targetTag) {
       return bot.sendMessage(chatId, "❌ У тебя нет @тега в Telegram. Добавь его в настройках.", { reply_to_message_id: msg.message_id });
     }
-
-    const player  = await getPlayerDescription(targetTag);
+    const clanId = await getClanId(chatId);
+   // const player  = await getPlayerDescription(targetTag);
     try { 
       // --- Обновляем в PostgreSQL ---
       await pool.query(
-       `UPDATE clan_members SET nickname = $1 WHERE lower(telegram_tag) = lower($2)`,
-        [newNickname, targetTag]
+       `UPDATE clan_members SET pubg_id = $1 WHERE lower(telegram_tag) = lower($2) and clan_id = $3`,
+        [newPubgId, targetTag, clanId]
       );
-
-      const clanId = await getClanId(chatId);
-      if(clanId){
-
-      const sheets = await getSheets();
-      const range = "Clan" + player.clan;
-      const res = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range });
-      const rows = res.data.values || [];
-      let updated = false;
-      const targetTagLower = targetTag.toLowerCase()
-      for (let i = 0; i < rows.length; i++) {
-          if (rows[i][2].toLowerCase() === targetTagLower) {
-          rows[i][1] = newNickname; // столбец B — Ник
-          updated = true;
-        }
-      }
-      if (updated) {
-        await sheets.spreadsheets.values.update({
-          spreadsheetId: SPREADSHEET_ID,
-          range,
-          valueInputOption: "RAW",
-          resource: { values: rows }
-        });
-      }
-      }
       bot.sendMessage(
         chatId,
-        `✅ Ник для ${targetTag} обновлён: ${newNickname}`,
+        `✅ Pubg ID для ${targetTag} обновлён: ${newNickname}`,
         { reply_to_message_id: msg.message_id }
       );
     } catch (err) {

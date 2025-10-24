@@ -1,14 +1,14 @@
 const db = require('./db');
 const path = require('path');                   // NEW
 const getPlayerDescription = require('./../db/getDescriptionDb');
-
-const admins = [
+const getClanLeaders = require('./../clan/getListLeaders');
+/*const admins = [
   '@nurka7',
   '@chessmankir',
   '@winepubg',
   '@reqwil',
   '@ERROR_4002'
-];
+]; */
 
 // Экранирование для classic Markdown (Telegram parse_mode: 'Markdown')
 function escapeMd(s) {
@@ -30,7 +30,7 @@ module.exports = function (bot) {
       try {
         // Проверяем наличие пользователя в базе
         const memberRes = await db.query(
-          `SELECT clan FROM clan_members WHERE actor_id = $1 AND active = TRUE LIMIT 1`,
+          `SELECT clan, clan_id FROM clan_members WHERE actor_id = $1 AND active = TRUE LIMIT 1`,
           [actorId]
         );
 
@@ -40,14 +40,21 @@ module.exports = function (bot) {
         }
 
         const clan = Number(memberRes.rows[0].clan);
+        const clanId = Number(memberRes.rows[0].clan_id);
 
         // валидные только 1..4
         if (!(clan >= 1 && clan <= 5)) {
           return;
         }
-
+        console.log('inner');
+        console.log(clanId);
+        console.log(clan);
+        const admins = await getClanLeaders(clanId);
+        console.log(admins);
         const adminUsername = admins[clan - 1];
+        console.log(adminUsername);
         const admin = await getPlayerDescription(adminUsername);
+        console.log(admin);
         if (!admin) {
           return;
         }
@@ -55,7 +62,7 @@ module.exports = function (bot) {
         // Сообщение в личку
         const welcomeMessage = (
 `👋 Здравствуйте, ${escapeMd(newUser.first_name || '')}!
-Добро пожаловать в клан Checkmate.
+Добро пожаловать в клан.
 Пожалуйста, ознакомься с нашими правилами. Напишите в чат клана слово "Правила" без кавычек`
         ).trim();
 

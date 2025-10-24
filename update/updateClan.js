@@ -36,7 +36,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       return bot.sendMessage(chatId, "❌ Клан может быть только от 1 до 5", { reply_to_message_id: msg.message_id });
     }
 
-    if (!isAdminChat(chatId)) return;
+    if (!await isAdminChat(chatId)) return;
 
     let targetUser = (mentionedUser || username).toLowerCase();
     if (!targetUser.startsWith('@')) targetUser = '@' + targetUser;

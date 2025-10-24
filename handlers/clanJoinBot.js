@@ -4,6 +4,8 @@ const saveDescription = require('./saveDescriptionFunc');
 const isAllowedChat = require('../admin/permissionChats'); // пока не используется
 const saveMemberDb = require('./saveMemberDb');
 const getPlayerDescription = require('./../db/getDescriptionDb');
+const getClan = require('../clan/getClan');
+const getSubClan = require('../clan/getClan');
 
 const usersInProcess = new Map();
 
@@ -18,7 +20,7 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
     if (msg.chat.type !== 'private') return; // игнор в группах
 
     const chatId = msg.chat.id;
-    const welcomeText = 'Добро пожаловать в комьюнити Checkmate! ♟️';
+    const welcomeText = 'Добро пожаловать в комьюнити Checkmate!';
 
     bot.sendPhoto(chatId, fs.readFileSync('./Images/IMG_3371.png'), {
       caption: welcomeText,
@@ -256,18 +258,29 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
         await db.query('UPDATE invites SET is_active = false WHERE invite_code = $1', [
           user.data.inviteCode
         ]);
-        
+        const clan = await getClan(user.data.clanId);
+        let clanName = '';
+        if (clan.name != false){
+          clanName = clan.name;
+        }
+        console.log(clan);
+        const subClan = await getSubClan(user.data.clanId, user.data.clan);
+        console.log(subClan);
         await bot.sendMessage(
           chatId,
-          '🎉 Ты принят в клан! Добро пожаловать в клан CheckMate♟️'
+          '🎉 Ты принят в клан! Добро пожаловать в клан ' + clanName + '♟️'
         );
-
-        if (Number(dataToSave.clan) === 1 || Number(dataToSave.clan) === 2 || 
+        let inviteLink = '';
+        if (subClan.invite_link != false){
+          inviteLink = subClan.invite_link;
+        }
+        await bot.sendMessage(chatId, inviteLink);
+        /*if (Number(dataToSave.clan) === 1 || Number(dataToSave.clan) === 2 || 
             Number(dataToSave.clan) === 5) {
           await bot.sendMessage(chatId, inviteLink1);
         } else {
           await bot.sendMessage(chatId, inviteLink2);
-        }
+        }*/
         
         if(user.data.clanId == 1){
           await saveDescription(dataToSave);

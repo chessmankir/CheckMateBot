@@ -1,12 +1,10 @@
 const { google } = require('googleapis');
 const db = require('./db');
 const isAdminChat = require('../admin/permissionAdminChat');
+const getClanId = require('../clan/getClanId');
+const getClanChats = require('../clan/getClanChat');
 
 const SHEET_PREFIX = 'Clan';
-const ALLOWED_CHAT_IDS = [
-  -1002549710535, // чат кланов 1/2
-  -1002833167359  // чат клана 3
-];
 
 async function getSheetIdByTitle(sheets, spreadsheetId, title) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
@@ -20,15 +18,18 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     if (!isAdminChat(chatId)) return;
 
     const username = `@${match[1]}`; // тег вида @user
-
+    const clanId = await getClanId(chatId);
+    const chats = await getClanChats(clanId);
+    console.log(chats);
     try {
       // 1) находим запись в БД
       const res = await db.query(
-        `SELECT actor_id, clan FROM clan_members WHERE LOWER(telegram_tag) = LOWER($1) LIMIT 1`,
-        [username]
+        `SELECT actor_id, clan FROM clan_members WHERE LOWER(telegram_tag) = LOWER($1) AND clan_id = $2 LIMIT 1`,
+        [username, clanId]
       );
 
       if (res.rowCount === 0) {
+        console.log(res.rows);
         return bot.sendMessage(chatId, `❌ Участник ${username} не найден в базе.`, {
           reply_to_message_id: msg.message_id,
         });
@@ -38,19 +39,23 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
 
       // 2) помечаем неактивным в БД
       await db.query(
-        `UPDATE clan_members SET active = FALSE WHERE LOWER(telegram_tag) = LOWER($1)`,
-        [username]
+        `UPDATE clan_members SET active = FALSE WHERE LOWER(telegram_tag) = LOWER($1) AND clan_id = $2`,
+        [username, clanId]
       );
 
       // 3) если есть actorId — баним в чате
       if (actorId) {
-        const targetChatId = (clan === 3) ? ALLOWED_CHAT_IDS[1] : ALLOWED_CHAT_IDS[0];
-        try {
-          await bot.banChatMember(targetChatId, actorId);
-        } catch (e) {
-          console.warn(`Не удалось забанить ${username} в чате ${targetChatId}:`, e.message);
+        for (const chat of chats) {
+          try {
+            await bot.banChatMember(chat, actorId);      
+            await new Promise(res => setTimeout(res, 400));
+          } catch (err) {
+            console.error(`❌ Ошибка при бане в чате ${targetChatId}:`, err.description || err.message);
+          }
         }
       }
+
+      if(clanId == 1){
 
       // 4) удаляем строку из соответствующего листа Google Sheets (Clan{clan}) по тегу
       const client = await auth.getClient();
@@ -88,7 +93,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
           });
         }
       }
-
+      }
       await bot.sendMessage(
         chatId,
         actorId

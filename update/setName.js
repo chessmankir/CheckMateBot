@@ -49,7 +49,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       );
     }
 
-    if (isAdminCommand && !isAdminChat(chatId)) {
+    if (isAdminCommand && !await isAdminChat(chatId)) {
       // тихий выход, как и в твоём +ник
       return;
     }

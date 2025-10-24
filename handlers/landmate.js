@@ -2,6 +2,7 @@
 const pool = require('../handlers/db');
 const { getOrInsertCityCoords } = require('../data/geocodeWithCache');
 const RADIUS_M = (parseInt(process.env.RADIUS_KM, 10) || 400) * 1000;
+const getClanId = require('../clan/getClanId');
 
 function normCity(s) { return (s || '').trim(); }
 
@@ -27,6 +28,7 @@ module.exports = function (bot) {
     }
 
     const client = await pool.connect();
+    
     try {
       // 1) город пользователя
       const rCity = await client.query(
@@ -49,6 +51,7 @@ module.exports = function (bot) {
       const me = await getOrInsertCityCoords(myCity);
 
       // 3) поиски соседей
+      const clanId = await getClanId(chatId);
       const q = `
         with me as (
           select $1::float8 as tlat, $2::float8 as tlon, $3::text as my_tag
@@ -69,13 +72,14 @@ module.exports = function (bot) {
         where cm.telegram_tag is not null
           and cm.telegram_tag <> m.my_tag
           and cm.active = TRUE
+          and cm.clan_id = $5
           and earth_box(ll_to_earth(m.tlat, m.tlon), $4) @> ll_to_earth(cc.lat, cc.lon)
           and earth_distance(ll_to_earth(m.tlat, m.tlon), ll_to_earth(cc.lat, cc.lon)) <= $4
         group by cm.telegram_tag, cm.city, cc.lat, cc.lon, m.tlat, m.tlon
         order by km asc
         limit 50;
       `;
-      const r = await client.query(q, [me.lat, me.lon, targetTag, RADIUS_M]);
+      const r = await client.query(q, [me.lat, me.lon, targetTag, RADIUS_M, clanId ]);
 
       const radiusKm = RADIUS_M / 1000;
 
