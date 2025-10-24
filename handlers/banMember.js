@@ -50,7 +50,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
             await bot.banChatMember(chat, actorId);      
             await new Promise(res => setTimeout(res, 400));
           } catch (err) {
-            console.error(`❌ Ошибка при бане в чате ${targetChatId}:`, err.description || err.message);
+            
           }
         }
       }
