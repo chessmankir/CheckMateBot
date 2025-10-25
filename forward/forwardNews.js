@@ -7,8 +7,8 @@ module.exports = async function (bot) {
     const allChats = await getAllChats();
 
     // Проходимся по каждому чату
-    // const nameTgk = "@winepubgm";
-    const nameTgk = "@prikolforward";
+     const nameTgk = "@winepubgm";
+  //  const nameTgk = "@prikolforward";
     for (const chat of allChats) {
       const chatId = chat.chat_id || chat.id || chat;
       try {
