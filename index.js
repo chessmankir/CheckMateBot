@@ -93,10 +93,11 @@ require("./update/setPubgId")(bot, auth, SPREADSHEET_ID);
 require("./handlers/saveActorIdbyMessage")(bot, auth, SPREADSHEET_ID);
 require("./handlers/getTelegramInfo")(bot);
 const testData = require("./handlers/testData");
+
+const forward = require("./forward/forwardNews");
+forward(bot);
 // testData(bot);
-const handleChannelForward = require("./handlers/channelForward");
-handleChannelForward(bot, "@winepubgm", "-1002549710535");
-handleChannelForward(bot, "@winepubgm", "-1002833167359");
+
 const keepAlive = require("./keepAlive"); // ← подключаем сервер
 // 🟢 Запускаем HTTP-сервер (не даст Replit заснуть)
 

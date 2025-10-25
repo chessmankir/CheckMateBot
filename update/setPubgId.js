@@ -14,7 +14,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
   bot.onText(/^\+id(?:\s+@(\S+)\s+(.+)|\s+(.+))?$/, async (msg, match) => {
     const chatId = msg.chat.id;
     const fromUser = msg.from.username ? `@${msg.from.username}` : null;
-
+    console.log('id');
     // Определяем режим команды
     const isAdminCommand = !!match[1]; // если указан @тег
     let targetTag = match[1] ? match[1] : fromUser;
@@ -25,9 +25,10 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       targetTag = '@' + targetTag;
     }
     const newPubgId = match[2] || match[3];
+    console.log(newPubgId);
 
-    if (!newNickname) {
-      return bot.sendMessage(chatId, "❌ Укажи ник после команды `+ник`.", { reply_to_message_id: msg.message_id });
+    if (!newPubgId) {
+      return bot.sendMessage(chatId, "❌ Укажи id после команды `+id`.", { reply_to_message_id: msg.message_id });
     }
 
     // Проверка: если команда с тегом, но не в админском чате
@@ -41,6 +42,7 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     }
     const clanId = await getClanId(chatId);
    // const player  = await getPlayerDescription(targetTag);
+    console.log(clanId);
     try { 
       // --- Обновляем в PostgreSQL ---
       await pool.query(
@@ -49,12 +51,12 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       );
       bot.sendMessage(
         chatId,
-        `✅ Pubg ID для ${targetTag} обновлён: ${newNickname}`,
+        `✅ Pubg ID для ${targetTag} обновлён: ${newPubgId}`,
         { reply_to_message_id: msg.message_id }
       );
     } catch (err) {
       console.error("Ошибка при обновлении ника:", err);
-      bot.sendMessage(chatId, "❌ Ошибка при сохранении ника.", { reply_to_message_id: msg.message_id });
+      bot.sendMessage(chatId, "❌ Ошибка при сохранении id.", { reply_to_message_id: msg.message_id });
     }
   });
 };
