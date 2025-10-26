@@ -116,13 +116,14 @@ module.exports = function registerClanWizard(bot) {
 
       try {
         // (A) уже есть активный клан у этого владельца?
-        const check = await db.query(
+      /*  const check = await db.query(
           `SELECT id, name
              FROM clans
             WHERE owner_actor_id = $1 AND is_active = TRUE
             LIMIT 1`,
           [userId]
         );
+        /*
         if (check.rowCount > 0) {
           wizardState.delete(userId);
           return bot.sendMessage(
@@ -131,14 +132,14 @@ module.exports = function registerClanWizard(bot) {
             `Сначала деактивируйте его, чтобы создать новый.`
           );
         }
-        
-        await db.query('BEGIN');
+        */
 
+        await db.query('BEGIN');
+        
         // (B) создаём клан
         const insClan = await db.query(
           `INSERT INTO clans (name, owner_actor_id, is_active, invite_link)
            VALUES ($1, $2, TRUE, $3)
-           ON CONFLICT (name) DO NOTHING
            RETURNING id`,
           [clanName, userId, p.clan_link]
         );
@@ -148,7 +149,6 @@ module.exports = function registerClanWizard(bot) {
           return bot.sendMessage(msg.chat.id, '⚠️ Клан с таким названием уже зарегистрирован.');
         }
         const clanId = insClan.rows[0].id;
-
         // (C) сохраняем лидера в clan_members
         // Требуется уникальный ключ на (clan, actor_id) — чтобы апдейтить без дублей
         await db.query(
@@ -156,7 +156,7 @@ module.exports = function registerClanWizard(bot) {
              (clan_id, actor_id, telegram_tag, name, nickname, pubg_id, age, city, active, created_at, clan)
            VALUES
              ($1,   $2,       $3,           $4,   $5,   $6,      $7,  $8, TRUE, NOW(), 1)
-           ON CONFLICT (clan, actor_id) DO UPDATE
+           ON CONFLICT (clan_id, actor_id) DO UPDATE
              SET telegram_tag = EXCLUDED.telegram_tag,
                  name         = EXCLUDED.name,
                  nickname     = EXCLUDED.nickname,
@@ -199,8 +199,12 @@ module.exports = function registerClanWizard(bot) {
         );
 
         wizardState.delete(userId);
-      } catch (err) {
+      } 
+      catch (err) {
         try { await db.query('ROLLBACK'); } catch (_) {}
+        console.error('register clan FINAL error', {
+          code: err.code, constraint: err.constraint, table: err.table, detail: err.detail
+        });
         if (err && err.code === '23505') {
           return bot.sendMessage(
             msg.chat.id,
