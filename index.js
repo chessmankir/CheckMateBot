@@ -92,6 +92,8 @@ require("./update/setNick")(bot, auth, SPREADSHEET_ID);
 require("./update/setPubgId")(bot, auth, SPREADSHEET_ID);
 require("./handlers/saveActorIdbyMessage")(bot, auth, SPREADSHEET_ID);
 require("./handlers/getTelegramInfo")(bot);
+
+require("./clan/setInviteLink")(bot);
 const testData = require("./handlers/testData");
 
 const forward = require("./forward/forwardNews");

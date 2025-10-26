@@ -2,6 +2,7 @@ const db = require('../handlers/db'); // путь к подключению к �
 const isAllowedChat = require('../admin/permissionChats');
 const isAdminChat = require('../admin/permissionAdminChat');
 const { getUserStats } = require('../handlers/activityTracker');
+const getClanId = require('../clan/getClanId');
 
 function escapeMarkdown(text) {
   if (!text) return '—';
@@ -33,15 +34,15 @@ module.exports = function (bot) {
     if (!isAdminChat(chatId)) return;
 
     const query = match[1].trim().toLowerCase();
-
+    const clanId = await getClanId(chatId);
     try {
       const res = await db.query(
         `SELECT * FROM clan_members 
-         WHERE LOWER(telegram_tag) = $1 
+         WHERE LOWER(telegram_tag) = $1 and clan_id = $2
          OR CAST(pubg_id AS TEXT) = $1 
          OR LOWER(nickname) = $1
          LIMIT 1`,
-        [query]
+        [query, clanId]
       );
 
       if (res.rows.length === 0) {

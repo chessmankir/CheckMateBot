@@ -1,6 +1,7 @@
 const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
 const isAdminChat = require('../admin/permissionAdminChat');
+const getClanId = require('../clan/getClanId');
 
 module.exports = function (bot) {
 
@@ -8,9 +9,10 @@ module.exports = function (bot) {
   bot.onText(/!баны/, async (msg, match) => {
     const chatId = msg.chat.id;
     if (!isAdminChat(chatId)) return;
+    const clanId = await getClanId(chatId);
     try {
       const res = await db.query(
-        'SELECT telegram_tag, nickname, created_at FROM clan_members WHERE active = FALSE ORDER BY telegram_tag'
+        'SELECT telegram_tag, nickname, created_at FROM clan_members WHERE active = FALSE and clan_id = ' + clanId + 'ORDER BY telegram_tag'
       );
 
       if (res.rows.length === 0) {

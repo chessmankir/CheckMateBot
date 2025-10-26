@@ -2,14 +2,22 @@ const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
 const isAdminChat = require('../admin/permissionAdminChat');
 const getClanId = require('../clan/getClanId');
+const getClanLimits = require('../clan/getClanLimits');
 
-const clanLimits = {
-  1: 55,
-  2: 60,
-  3: 60,
-  4: 40,
-  5: 60
-};
+function normalizeLimits(raw) {
+  if (!raw) return {};
+  if (Array.isArray(raw)) {
+    const obj = {};
+    for (const r of raw) {
+      // поддержка разных имен полей
+      const key = Number(r.number ?? r.clan ?? r.subclan ?? r.id);
+      const val = Number(r.member_limit ?? r.limit ?? r.value);
+      if (Number.isFinite(key) && Number.isFinite(val)) obj[key] = val;
+    }
+    return obj;
+  }
+  return raw; // уже объект { [number]: limit }
+}
 
 module.exports = function (bot) {
 
@@ -18,6 +26,9 @@ module.exports = function (bot) {
     const chatId = msg.chat.id;
     const clanNumber = parseInt(match[1]);
     if (!isAdminChat(chatId)) return;
+    const clanId = await getClanId( chatId);
+    const rawLimits = await getClanLimits(clanId);
+    const clanLimits = normalizeLimits(rawLimits);
 
     if (!clanLimits[clanNumber]) {
       return bot.sendMessage(chatId, '❌ Неверный номер клана.', {
@@ -27,7 +38,7 @@ module.exports = function (bot) {
 
     try { 
       console.log("before");
-      const clanId = await getClanId( chatId);
+      
       console.log(clanId);
       const res = await db.query(
         'SELECT telegram_tag, nickname, created_at FROM clan_members WHERE clan = $1 AND active = TRUE AND clan_id = $2 ORDER BY telegram_tag',
@@ -56,7 +67,7 @@ module.exports = function (bot) {
         return `${i + 1}. ${m.telegram_tag || '(без тега)'} — ${m.nickname || '(без ника)'} — ${diffDays} дн.`;
       });
 
-      
+
       const message = `Список участников клана Checkmate ${clanNumber} — ${members.length}/${clanLimits[clanNumber]}:\n\n${lines.join('\n')}`;
 
       bot.sendMessage(chatId, message, { reply_to_message_id: msg.message_id });

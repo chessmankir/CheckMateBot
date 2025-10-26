@@ -1,5 +1,6 @@
         // handlers/memberEventsHandler.js
 const getPlayerDescription = require('./../db/getDescriptionDb');
+const getClan = require('../clan/getClan');
 
 module.exports = function(bot, notifyChatId, threadMessageId) {
           // Отладочный обработчик для всех сообщений
@@ -16,9 +17,7 @@ module.exports = function(bot, notifyChatId, threadMessageId) {
     msg.new_chat_members.map(async (user) => {
       const tag = user.username ? `@${user.username}` : null;
       const name = tag || `${user.first_name} ${user.last_name || ''}`.trim();
-
-      const player = tag ? await getPlayerDescription(tag) : null;
-      console.log(player);
+      const player = tag ? await getPlayerDescription(tag) : null;  
       const message =
         `✅ Вступил в группу "${chatTitle}": ${name}` +
         (player ? `\nНик: ${player.nick}\nКлан: ${player.clan}` : '');
@@ -28,10 +27,18 @@ module.exports = function(bot, notifyChatId, threadMessageId) {
       }); */
 
       try {
-        await bot.sendMessage(notifyChatId, message, {
-          reply_to_message_id: threadMessageId, // если он валидный
-        //  allow_sending_without_reply: true
-        });
+        const clanId = player.clanId;
+        const clan = await getClan(clanId);
+        if (player.clanId == 1 ){
+          await bot.sendMessage(notifyChatId, message, {
+            reply_to_message_id: threadMessageId, // если он валидный
+          //  allow_sending_without_reply: true
+          });
+        }
+        else{
+          await bot.sendMessage(clan.admin_chat_id, message);
+        }
+        
       } catch (err) {
       //  console.error('⚠️ Ошибка при отправке сообщения в notifyChatId:', err.description || err.message);
       }
