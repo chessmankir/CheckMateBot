@@ -1,16 +1,22 @@
-// modules/registerClanWizard.js
 const db = require('../handlers/db');
 const createSubclan = require('../clan/createSubClanDb');
 
 const FALLBACK_CODE = process.env.CLAN_VERIFY_CODE || '417';
 const wizardState = new Map();
 
-// простые валидаторы/нормализаторы
+// ===== Утилиты =====
 function normText(s) { return (s || '').toString().trim(); }
 function normDigits(s) { return (s || '').toString().replace(/\D+/g, ''); }
 function toIntOrNull(s) {
   const n = parseInt((s || '').toString().trim(), 10);
   return Number.isFinite(n) ? n : null;
+}
+/** Возвращает корректный username (без @) или null */
+function getValidUsername(from) {
+  const u = (from && from.username) ? String(from.username).trim() : '';
+  // Telegram username: 5..32 символов [A-Za-z0-9_]
+  if (/^[A-Za-z0-9_]{5,32}$/.test(u)) return u;
+  return null;
 }
 
 module.exports = function registerClanWizard(bot) {
@@ -23,6 +29,26 @@ module.exports = function registerClanWizard(bot) {
 
     const chatId = q.message.chat.id;
     const userId = q.from.id;
+
+    // ✅ Требуем наличие username до старта мастера
+    const uname = getValidUsername(q.from);
+    if (!uname) {
+      await bot.answerCallbackQuery(q.id, { text: 'Нужен username в Telegram.', show_alert: true });
+      return bot.sendMessage(
+        chatId,
+        [
+          '❗ Для регистрации клана нужен *username* в Telegram.',
+          '',
+          'Как установить:',
+          '1) Откройте *Настройки* Telegram.',
+          '2) Нажмите *Изменить профиль* → *Имя пользователя*.',
+          '3) Установите имя (5–32 символа: латиница, цифры, _ ).',
+          '',
+          'После этого снова нажмите кнопку «Зарегистрировать клан».'
+        ].join('\n'),
+        { parse_mode: 'Markdown' }
+      );
+    }
 
     wizardState.set(userId, { step: 'ask_clan_name', payload: {} });
     await bot.answerCallbackQuery(q.id);
@@ -56,16 +82,15 @@ module.exports = function registerClanWizard(bot) {
 
     // 2.2 Проверочный код
     if (s.step === 'ask_code') {
-      const code = normDigits(msg.text);             // оставляем только цифры
-      const expected = normDigits(FALLBACK_CODE);    // '417' → '417'
+      const code = normDigits(msg.text);
+      const expected = normDigits(FALLBACK_CODE);
       if (code !== expected) {
         return bot.sendMessage(msg.chat.id, 'Код неверный. Проверьте и попробуйте ещё раз.');
       }
       s.step = 'ask_leader_name';
-      wizardState.set(userId, s);                    // явно сохраняем состояние
+      wizardState.set(userId, s);
       return bot.sendMessage(msg.chat.id, '👤 Введите имя (как зовут).');
     }
-
 
     // 2.3 Имя лидера
     if (s.step === 'ask_leader_name') {
@@ -112,30 +137,30 @@ module.exports = function registerClanWizard(bot) {
       p.leader_city = city;
 
       const clanName = p.clan_name;
-      const telegramTag = msg.from.username ? '@' + msg.from.username : null;
+
+      // 🔁 Повторная проверка username перед записью в БД
+      const username = getValidUsername(msg.from);
+      if (!username) {
+        wizardState.delete(userId);
+        return bot.sendMessage(
+          msg.chat.id,
+          [
+            '❗ Нельзя завершить регистрацию — у вашего аккаунта нет корректного *username*.',
+            '',
+            'Как установить:',
+            '1) Откройте *Настройки* Telegram.',
+            '2) *Имя пользователя* → задайте имя (5–32 символа: латиница, цифры, _ ).',
+            '',
+            'После этого начните регистрацию заново.'
+          ].join('\n'),
+          { parse_mode: 'Markdown' }
+        );
+      }
+      const telegramTag = '@' + username;
 
       try {
-        // (A) уже есть активный клан у этого владельца?
-      /*  const check = await db.query(
-          `SELECT id, name
-             FROM clans
-            WHERE owner_actor_id = $1 AND is_active = TRUE
-            LIMIT 1`,
-          [userId]
-        );
-        /*
-        if (check.rowCount > 0) {
-          wizardState.delete(userId);
-          return bot.sendMessage(
-            msg.chat.id,
-            `⚠️ У вас уже зарегистрирован активный клан «${check.rows[0].name}» (ID: ${check.rows[0].id}). ` +
-            `Сначала деактивируйте его, чтобы создать новый.`
-          );
-        }
-        */
-
         await db.query('BEGIN');
-        
+
         // (B) создаём клан
         const insClan = await db.query(
           `INSERT INTO clans (name, owner_actor_id, is_active, invite_link)
@@ -149,8 +174,8 @@ module.exports = function registerClanWizard(bot) {
           return bot.sendMessage(msg.chat.id, '⚠️ Клан с таким названием уже зарегистрирован.');
         }
         const clanId = insClan.rows[0].id;
+
         // (C) сохраняем лидера в clan_members
-        // Требуется уникальный ключ на (clan, actor_id) — чтобы апдейтить без дублей
         await db.query(
           `INSERT INTO clan_members
              (clan_id, actor_id, telegram_tag, name, nickname, pubg_id, age, city, active, created_at, clan)
@@ -176,13 +201,14 @@ module.exports = function registerClanWizard(bot) {
           ]
         );
 
-        const insertRes = await db.query(
+        // (D) создаём первый подклан
+        await db.query(
           `INSERT INTO public.subclans (clan_id, leader_actor_id, invite_link, member_limit, number)
            VALUES ($1, $2, $3, $4, 1)
-           RETURNING id, clan_id, leader_actor_id, invite_link, member_limit, active, created_at, updated_at`,
+           RETURNING id`,
           [clanId, userId, p.clan_link, 60]
         );
-  
+
         await db.query('COMMIT');
 
         await bot.sendMessage(
@@ -199,8 +225,7 @@ module.exports = function registerClanWizard(bot) {
         );
 
         wizardState.delete(userId);
-      } 
-      catch (err) {
+      } catch (err) {
         try { await db.query('ROLLBACK'); } catch (_) {}
         console.error('register clan FINAL error', {
           code: err.code, constraint: err.constraint, table: err.table, detail: err.detail
@@ -217,5 +242,5 @@ module.exports = function registerClanWizard(bot) {
       }
     }
   });
-  
 };
+
