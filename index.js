@@ -94,6 +94,7 @@ require("./handlers/saveActorIdbyMessage")(bot, auth, SPREADSHEET_ID);
 require("./handlers/getTelegramInfo")(bot);
 
 require("./clan/setInviteLink")(bot);
+require("./clan/setInviteMemberLimit")(bot);
 const testData = require("./handlers/testData");
 
 const forward = require("./forward/forwardNews");
