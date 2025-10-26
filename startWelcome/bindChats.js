@@ -1,5 +1,6 @@
 // modules/registerClanWizard.js
 const db = require('../handlers/db');
+const getClanId = require('../clan/getClanId');
 
 module.exports = function bindChats(bot) {
   bot.onText(/^!привязать\s+админку$/iu, async (msg) => {
@@ -21,7 +22,6 @@ module.exports = function bindChats(bot) {
       }
 
       const clanId = rows[0].id;
-      consolw.log(clanId);
       await db.query(
         `UPDATE clans
             SET admin_chat_id = $1
@@ -35,7 +35,10 @@ module.exports = function bindChats(bot) {
         { parse_mode: 'Markdown' }
       );
     } catch (e) {
-      console.error('bind_admin error', e);
+      console.error('bind_admin error', err);
+      console.error('register clan FINAL error', {
+        code: err.code, constraint: err.constraint, table: err.table, detail: err.detail
+      });
       bot.sendMessage(adminChatId, '❌ Не удалось привязать админ-чат.');
     }
   });
