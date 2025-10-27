@@ -8,7 +8,10 @@ module.exports = function (bot) {
   // !+правила1 <текст>
   bot.onText(/^\+правила\s+([\s\S]+)/, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
 
     const content = (match?.[1] || '').trim();
     if (!content) {

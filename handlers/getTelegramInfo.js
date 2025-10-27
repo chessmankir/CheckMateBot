@@ -4,7 +4,10 @@ const isAdminChat = require('../admin/permissionAdminChat');
 module.exports = function (bot) {
   bot.onText(/^!инфо\s+(\d{3,})$/, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
    // if (typeof isAllowedChat === 'function' && !isAllowedChat(chatId)) return;
 
     const tgId = Number(match[1]); // tgId из команды

@@ -31,7 +31,10 @@ function formatWhen(ts) {
 module.exports = function (bot) {
   bot.onText(/!поиск\s+(.+)/i, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
 
     const query = match[1].trim().toLowerCase();
     const clanId = await getClanId(chatId);

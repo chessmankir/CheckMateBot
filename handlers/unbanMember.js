@@ -6,7 +6,10 @@ const getClanChats = require('../clan/getClanChat');
 module.exports = function (bot) {
   bot.onText(/!разбан\s+@(\S+)/, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAllowedChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
     const tag = `@${match[1]}`.toLowerCase();
     const clanId = await getClanId(chatId);
     const chats = await getClanChats(clanId);

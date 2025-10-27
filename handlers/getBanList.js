@@ -8,7 +8,10 @@ module.exports = function (bot) {
   // !списокN — участников определённого клана
   bot.onText(/!баны/, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
     const clanId = await getClanId(chatId);
     try {
       const res = await db.query(

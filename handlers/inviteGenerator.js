@@ -12,7 +12,10 @@ module.exports = function(bot) {
   bot.onText(/!инвайт(\d+)/, async (msg, match) => {
     const clanNumber = parseInt(match[1]);
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
 
     if (isNaN(clanNumber)) {
       return bot.sendMessage(msg.chat.id, '❗ Укажи номер клана: !инвайт1, !инвайт2 и т.д.', {

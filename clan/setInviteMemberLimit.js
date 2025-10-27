@@ -6,7 +6,10 @@ module.exports = function (bot) {
   // Пример: +лимит 3 60
   bot.onText(/^\+лимит\s+(\d+)\s+(\d+)/iu, async (msg, m) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
 
     const number = parseInt(m[1], 10);
     const limit  = parseInt(m[2], 10);
@@ -47,9 +50,12 @@ module.exports = function (bot) {
   });
 
   // Подсказка
-  bot.onText(/^\+лимит(?:\s+(\d+))?$/iu, (msg) => {
+  bot.onText(/^\+лимит(?:\s+(\d+))?$/iu, async (msg) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
     bot.sendMessage(
       chatId,
       'ℹ️ Использование: +лимит <номер_клана> <число>\n' +

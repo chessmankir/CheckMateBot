@@ -16,7 +16,11 @@ module.exports = function (bot) {
       if (!clanId) {
         return bot.sendMessage(chatId, '⚠️ ошибка создания.');
       }
-
+      const isADminChatPermisson = await isAdminChat(chatId);
+      if (!isADminChatPermisson){
+        return;
+      } 
+      
       // тег лидера
       const leaderTag = match[1];
       if (!leaderTag) {

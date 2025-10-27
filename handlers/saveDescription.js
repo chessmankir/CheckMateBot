@@ -13,7 +13,10 @@ module.exports = function (bot) {
   bot.onText(/^\+описание1\s+@(\S+)\n(.+)/s, async (msg, match) => {
     const chatId = msg.chat.id;
     console.log('chat');
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
     const from = msg.from;
     const target_username = `@${match[1]}`;
     const lines = match[2].trim().split('\n');

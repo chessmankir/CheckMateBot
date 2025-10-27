@@ -4,10 +4,13 @@ const getClanId   = require('../clan/getClanId');
 const setByNumber = require('../db/setInvtiteLinkDb'); // обновление по (clan_id, number)
 
 // Без parse_mode. Ссылка дублируется и текстом, и кнопкой.
-module.exports = function (bot) {
+module.exports =  function (bot) {
   bot.onText(/^\+ссылка\s+(\d+)\s+(\S+)/iu, async (msg, m) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
 
     const number = parseInt(m[1], 10);
     const link   = (m[2] || '').trim();
@@ -52,9 +55,12 @@ module.exports = function (bot) {
   });
 
   // Подсказка
-  bot.onText(/^\+ссылка(?:\s+(\d+))?$/iu, (msg) => {
+  bot.onText(/^\+ссылка(?:\s+(\d+))?$/iu, async (msg) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
     bot.sendMessage(
       chatId,
       'ℹ️ Использование: +ссылка <номер_подклана> <inviteLink>\n' +

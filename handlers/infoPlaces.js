@@ -21,7 +21,10 @@ function normalizeLimits(raw) {
 module.exports = function (bot) {
   bot.onText(/^!места$/iu, async (msg) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
 
     try {
       // 1) Определяем clan_id

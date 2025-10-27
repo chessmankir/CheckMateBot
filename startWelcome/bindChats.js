@@ -1,6 +1,7 @@
 // modules/registerClanWizard.js
 const db = require('../handlers/db');
 const getClanId = require('../clan/getClanId');
+const handleChannelForward = require("../handlers/channelForward");
 
 module.exports = function bindChats(bot) {
   bot.onText(/^!привязать\s+админку$/iu, async (msg) => {
@@ -72,8 +73,13 @@ module.exports = function bindChats(bot) {
                active = TRUE`,
         [clanId, chatId]
       );
-
       await bot.sendMessage(chatId, `✅ Чат привязан к клану.`, { parse_mode: 'Markdown' });
+      const nameTgk = "@winepubgm";
+      try {
+        await handleChannelForward(bot, nameTgk, chatId);
+      } catch (err) {
+        console.error(`⚠️ Ошибка при репосте в ${chatId}:`, err.message);
+      }
     } catch (e) {
       console.error('bind_member error', e);
       bot.sendMessage(chatId, '❌ Не удалось привязать чат.');

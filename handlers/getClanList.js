@@ -25,7 +25,10 @@ module.exports = function (bot) {
   bot.onText(/!список(\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const clanNumber = parseInt(match[1]);
-    if (!isAdminChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
     const clanId = await getClanId( chatId);
     const rawLimits = await getClanLimits(clanId);
     const clanLimits = normalizeLimits(rawLimits);
@@ -81,7 +84,10 @@ module.exports = function (bot) {
   // !полныйсписок — всех участников
   bot.onText(/!2список/, async (msg) => {
     const chatId = msg.chat.id;
-    if (!isAllowedChat(chatId)) return;
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
 
     try {
       const clanId = await getClanId( chatId);

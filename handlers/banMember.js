@@ -15,12 +15,13 @@ async function getSheetIdByTitle(sheets, spreadsheetId, title) {
 module.exports = function (bot, auth, SPREADSHEET_ID) {
   bot.onText(/^!бан\s+@(\S+)/, async (msg, match) => {
     const chatId = msg.chat.id;
-    if (!isAdminChat(chatId)) return;
-
+    const isADminChatPermisson = await isAdminChat(chatId);
+    if (!isADminChatPermisson){
+      return;
+    } 
     const username = `@${match[1]}`; // тег вида @user
     const clanId = await getClanId(chatId);
     const chats = await getClanChats(clanId);
-    console.log(chats);
     try {
       // 1) находим запись в БД
       const res = await db.query(

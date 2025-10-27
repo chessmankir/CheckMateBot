@@ -46,15 +46,9 @@ module.exports = function (bot) {
         if (!(clan >= 1 && clan <= 5)) {
           return;
         }
-        console.log('inner');
-        console.log(clanId);
-        console.log(clan);
         const admins = await getClanLeaders(clanId);
-        console.log(admins);
         const adminUsername = admins[clan - 1];
-        console.log(adminUsername);
         const admin = await getPlayerDescription(adminUsername);
-        console.log(admin);
         if (!admin) {
           return;
         }
