@@ -5,7 +5,7 @@ const isAllowedChat = require('../admin/permissionChats'); // пока не ис
 const saveMemberDb = require('./saveMemberDb');
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const getClan = require('../clan/getClan');
-const getSubClan = require('../clan/getClan');
+const getSubClan = require('../clan/getSubClan');
 
 const usersInProcess = new Map();
 
@@ -250,8 +250,6 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
         date: 0, 
         clan_id: user.data.clanId
       };
-      console.log('save');
-      console.log(dataToSave);
 
       try {
         await saveMemberDb(dataToSave);
@@ -263,9 +261,7 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
         if (clan.name != false){
           clanName = clan.name;
         }
-        console.log(clan);
         const subClan = await getSubClan(user.data.clanId, user.data.clan);
-        console.log(subClan);
         await bot.sendMessage(
           chatId,
           '🎉 Ты принят в клан! Добро пожаловать в клан ' + clanName + '♟️'

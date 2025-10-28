@@ -2,6 +2,7 @@ const db = require('./db');
 const isAllowedChat = require('../admin/permissionChats');
 const getClanId = require('../clan/getClanId');
 const getClanChats = require('../clan/getClanChat');
+const isAdminChat = require('../admin/permissionAdminChat');
 
 module.exports = function (bot) {
   bot.onText(/!разбан\s+@(\S+)/, async (msg, match) => {
@@ -26,7 +27,7 @@ module.exports = function (bot) {
       }
 
       const member = res.rows[0];
-
+      console.log(member);
       // Обновляем в базе
       await db.query(
         'UPDATE clan_members SET active = TRUE WHERE lower(telegram_tag) = $1',

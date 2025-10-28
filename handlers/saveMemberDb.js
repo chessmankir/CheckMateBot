@@ -61,7 +61,6 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE)
 `,
       [name, nick, target_username, age, pubg_id, city, clan, now, actor_id, clan_id]
     );
-     console.log(clan_id);
     return { status: 'created' };
 
   } catch (error) {
