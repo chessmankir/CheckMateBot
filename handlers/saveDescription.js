@@ -11,6 +11,7 @@ const admins = [
 // 📬 Обработчик команды "+описание1 @ник"
 module.exports = function (bot) {
   bot.onText(/^\+описание1\s+@(\S+)\n(.+)/s, async (msg, match) => {
+    return;
     const chatId = msg.chat.id;
     console.log('chat');
     const isADminChatPermisson = await isAdminChat(chatId);

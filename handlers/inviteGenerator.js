@@ -10,8 +10,10 @@ function generateCode() {
 
 module.exports = function(bot) {
   bot.onText(/!инвайт(\d+)/, async (msg, match) => {
+    console.log('invite');
     const clanNumber = parseInt(match[1]);
     const chatId = msg.chat.id;
+    console.log(chatId);
     const isADminChatPermisson = await isAdminChat(chatId);
     if (!isADminChatPermisson){
       return;

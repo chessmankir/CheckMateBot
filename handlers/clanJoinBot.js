@@ -1,12 +1,11 @@
 const db = require('./db');
 const fs = require('fs');
 const saveDescription = require('./saveDescriptionFunc');
-const isAllowedChat = require('../admin/permissionChats'); // пока не используется
 const saveMemberDb = require('./saveMemberDb');
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const getClan = require('../clan/getClan');
 const getSubClan = require('../clan/getSubClan');
-
+const profileInviteCallback = require('../startWelcome/registerProfileInvite');
 const usersInProcess = new Map();
 
 function hasUsername(from) {
@@ -14,7 +13,17 @@ function hasUsername(from) {
   return Boolean(from && typeof from.username === 'string' && from.username.trim().length > 0);
 }
 
+function escapeMarkdown(text) {
+  if (!text) return '—';
+  return text
+    .replace(/_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/`/g, '\\`')
+    .replace(/\[/g, '\\[');
+}
+
 module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
+  profileInviteCallback(bot, usersInProcess);
   // /start — только в личке
   bot.onText(/^\/start$/, (msg) => {
     if (msg.chat.type !== 'private') return; // игнор в группах
@@ -155,13 +164,13 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
       }
 
       // сохраняем, в каком чате идёт анкета (личка)
-      const player = await getPlayerDescription(userId);
+    /*  const player = await getPlayerDescription(userId);
       if (player != null) {
         bot.sendMessage(chatId, 'Вы уже были в клане', {
           reply_to_message_id: query.message.message_id
         });
         return;
-      }
+      } */
 
       usersInProcess.set(userId, { step: 'invite', expectedChatId: chatId, data: {} });
       return bot.sendMessage(chatId, 'Введи свой инвайт-код:', {
@@ -200,6 +209,41 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
       user.data.inviteCode = code;
       user.data.clan = res.rows[0].clan_name;
       user.data.clanId = res.rows[0].clan_id;
+
+      const player = await getPlayerDescription(userId);
+      if (player) {
+        user.step = "registration_invite_profile"; // этот шаг нужен для кнопок
+        user.updatePlayerInvite = true;
+        const text = [
+        "🧾 *Ваше описание:*",
+        "",
+        `👤 Имя:  ${escapeMarkdown(player.name)}`,
+        `🏷 Ник:  ${escapeMarkdown(player.nick)}`,
+        `🎮 PUBG ID: \` ${escapeMarkdown(player.pubgId)}\``,
+        `🎂 Возраст:  ${escapeMarkdown(player.age)}`,
+        `📍 Город:  ${escapeMarkdown(player.city)}`,
+        "",
+        "*Вы уже зарегистрированы в системе с этим описанием.*",
+        "Хотите *использовать его и продолжить* или *изменить* данные?",
+      ].join("\n");
+
+      await bot.sendMessage(msg.chat.id, text, {
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "✅ Использовать и продолжить",
+                callback_data: "profile_invite_continue",
+              },
+            ],
+            [{ text: "✏️ Изменить", callback_data: "profile_invite_edit" }],
+          ],
+        },
+      });
+        return
+      }
+
       user.step = 'pubg_id';
       return bot.sendMessage(chatId, '✅ Код принят. Введи свой PUBG ID:');
     }

@@ -7,7 +7,7 @@ module.exports = async function (chatId) {
     const clanRes = await db.query(
       `SELECT id AS clan_id
          FROM public.clans
-        WHERE admin_chat_id = $1
+        WHERE admin_chat_id = $1 AND is_active = true
         LIMIT 1`,
       [chatId]
     );
