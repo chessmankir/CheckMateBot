@@ -15,7 +15,7 @@ module.exports = function (bot) {
     const clanId = await getClanId(chatId);
     try {
       const res = await db.query(
-        'SELECT telegram_tag, nickname, created_at FROM clan_members WHERE active = FALSE and clan_id = ' + clanId + 'ORDER BY telegram_tag'
+        'SELECT telegram_tag, nickname, created_at FROM public.clan_members WHERE active = FALSE and clan_id = ' + clanId + ' ORDER BY telegram_tag'
       );
 
       if (res.rows.length === 0) {
@@ -41,7 +41,7 @@ module.exports = function (bot) {
       });
 
 
-      const message = `Список забаненных клана Checkmate:\n\n${lines.join('\n')}`;
+      const message = `Список забаненных клана:\n\n${lines.join('\n')}`;
 
       bot.sendMessage(chatId, message, { reply_to_message_id: msg.message_id });
 
