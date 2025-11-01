@@ -32,9 +32,9 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
     const mentionedUser = match[1];
     const clanNumber = parseInt(match[2]);
 
-    if (clanNumber < 1 || clanNumber > 5) {
+   /* if (clanNumber < 1 || clanNumber > 5) {
       return bot.sendMessage(chatId, "❌ Клан может быть только от 1 до 5", { reply_to_message_id: msg.message_id });
-    }
+    } */
 
     if (!await isAdminChat(chatId)) return;
 
