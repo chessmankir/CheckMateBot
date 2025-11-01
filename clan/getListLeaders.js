@@ -4,7 +4,8 @@ module.exports = async function getSubclanLeaders(clanId) {
   const res = await db.query(
     `SELECT leader_actor_id
        FROM public.subclans
-      WHERE clan_id = $1`,
+      WHERE clan_id = $1
+   ORDER BY number ASC`,
     [clanId]
   );
 
