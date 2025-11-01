@@ -3,6 +3,7 @@ const createSubclan = require('../clan/createSubClanDb');
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const getClanId = require('../clan/getClanId');
 const db = require('../handlers/db');
+const isAdminChat = require('../admin/permissionAdminChat');
 
 module.exports = function (bot) {
   // +подклан <leaderTag> [limit] [inviteLink?]
