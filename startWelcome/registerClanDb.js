@@ -86,6 +86,7 @@ async function registerClanDb(clanName, userId, telegramTag, p, wizardState){
   );
 
   await db.query("COMMIT");
+  return clanId;
 }
 
 module.exports = registerClanDb;

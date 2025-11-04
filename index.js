@@ -49,6 +49,7 @@ const testConnection = require("./handlers/dbconnection");
 
 require("./handlers/memberHandlers")(bot, notifyChatId, threadMessageId);
 require("./handlers/inviteGenerator")(bot); // ← генератор инвайтов
+require("./handlers/inviteClanGenerator")(bot); // ← генератор инвайтов
 require("./handlers/banMember")(bot, auth, SPREADSHEET_ID);
 require("./handlers/unbanMember")(bot, auth, SPREADSHEET_ID);
 require("./handlers/clanJoinBot")(bot, notifyChatId, inviteLink1, inviteLink2);

@@ -10,10 +10,9 @@ function generateCode() {
 
 module.exports = function(bot) {
   bot.onText(/!инвайт(\d+)/, async (msg, match) => {
-    console.log('invite');
+    console.log("invite");
     const clanNumber = parseInt(match[1]);
     const chatId = msg.chat.id;
-    console.log(chatId);
     const isADminChatPermisson = await isAdminChat(chatId);
     if (!isADminChatPermisson){
       return;
@@ -40,7 +39,7 @@ module.exports = function(bot) {
       });
       
       bot.sendMessage(msg.chat.id, `<code>${inviteCode}</code>`, {
-        parse_mode: 'HTML',
+      parse_mode: 'HTML',
         reply_to_message_id: msg.message_id,
       });
 

@@ -20,6 +20,11 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
       return;
     } 
     const username = `@${match[1]}`; // тег вида @user
+    const full = (msg.text || '').trim();
+
+    // ищем причину в том же сообщении (после @тега), поддерживает перенос строки
+    const mReason = full.match(/^!бан\s+@\S+\s+([\s\S]+)$/iu);
+    const reason = mReason ? mReason[1].trim() : null;
     const clanId = await getClanId(chatId);
     const chats = await getClanChats(clanId);
     try {
@@ -54,6 +59,17 @@ module.exports = function (bot, auth, SPREADSHEET_ID) {
             
           }
         }
+      }
+     console.log(reason);
+      if (reason) {
+        const moderatorTag = msg.from?.username ? `@${msg.from.username}` : null;
+        const moderatorId = msg.from?.id || null;
+        await db.query(
+          `INSERT INTO public.ban_reasons
+             (clan_id, actor_id, telegram_tag, reason, moderator_tg_id, moderator_tag)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [clanId, actorId, username, reason, moderatorId, moderatorTag]
+        );
       }
 
       if(clanId == 1){

@@ -12,6 +12,7 @@ const registerClan = require("./registerClanDb");
 const getPlayerDescription = require('./../db/getDescriptionDb');
 const deactivateOwnerClans = require("../clan/deactivateOwnerClans");
 const { chat } = require("googleapis/build/src/apis/chat");
+const deactivateClanInviteDB = require("../db/deactivateClanInviteDB");
 
 
 module.exports = function handleExistingProfileCallback(bot, wizardState) {
@@ -42,9 +43,9 @@ module.exports = function handleExistingProfileCallback(bot, wizardState) {
         await bot.sendMessage(q.message.chat.id, 'Продолжаю регистрацию клана…');
         
         try {
-
-          await registerClan(p.clan_name, userId, telegramTag, p, wizardState);
           await deactivateOwnerClans(userId);
+          const clanId = await registerClan(p.clan_name, userId, telegramTag, p, wizardState);
+          await deactivateClanInviteDB(clanId, p.inviteCode);
           await bot.sendMessage(
             chatId,
             [

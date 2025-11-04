@@ -4,6 +4,7 @@ const createSubclan = require("../clan/createSubClanDb");
 const registerCallback = require("./registerCallback");
 const registerClan = require("./registerClanDb");
 const deactivateOwnerClans = require("../clan/deactivateOwnerClans");
+const deactivateClanInviteDB = require("../db/deactivateClanInviteDB");
 
 const FALLBACK_CODE = process.env.CLAN_VERIFY_CODE || "417";
 const wizardState = new Map();
@@ -90,6 +91,7 @@ module.exports = function registerClanWizard(bot) {
 
     const p = s.payload;
     p.updatePlayer = false;
+    p.inviteCode = false;
 
     // 2.1 Название клана
     if (s.step === "ask_clan_name") {
@@ -112,20 +114,31 @@ module.exports = function registerClanWizard(bot) {
 
     // 2.2 Проверочный код
     if (s.step === "ask_code") {
-      const code = normDigits(msg.text);
+      const code = msg.text;
+      const res = await db.query(
+        'SELECT * FROM clan_invites WHERE code = $1 AND active = true',
+        [code]
+      );
+      if (res.rowCount === 0) {
+        return bot.sendMessage(
+          msg.chat.id,
+          '❌ Код недействителен или уже использован. Введи снова:'
+        );
+      }
+      p.inviteCode = code;
+     /* const code = normDigits(msg.text);
       const expected = normDigits(FALLBACK_CODE);
       if (code !== expected) {
         return bot.sendMessage(
           msg.chat.id,
           "Код неверный. Проверьте и попробуйте ещё раз."
         );
-      }
+      } */
 
       const state = wizardState.get(userId) || { step: null, payload: {} };
-      const p = state.payload || (state.payload = {});
+    //  const p = state.payload || (state.payload = {});
 
       const player = await getPlayerDescription(userId);
-      console.log(player);
 
       if (player) {
         state.step = "confirm_existing_profile"; // этот шаг нужен для кнопок
@@ -244,7 +257,8 @@ module.exports = function registerClanWizard(bot) {
       console.log(p);
       try {
         await deactivateOwnerClans(userId);
-        await registerClan(clanName, userId, telegramTag, p, wizardState); 
+        const clanId =  await registerClan(clanName, userId, telegramTag, p, wizardState); 
+        await deactivateClanInviteDB(clanId, p.inviteCode);
         await bot.sendMessage(
           msg.chat.id,
           [
