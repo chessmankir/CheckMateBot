@@ -164,13 +164,13 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
       }
 
       // сохраняем, в каком чате идёт анкета (личка)
-      const player = await getPlayerDescription(userId);
+      /*const player = await getPlayerDescription(userId);
       if (player != null && player.clanId == 1) {
         bot.sendMessage(chatId, 'Вы уже были в клане', {
           reply_to_message_id: query.message.message_id
         });
         return;
-      } 
+      } */
 
       usersInProcess.set(userId, { step: 'invite', expectedChatId: chatId, data: {} });
       return bot.sendMessage(chatId, 'Введи свой инвайт-код:', {
