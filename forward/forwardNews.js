@@ -5,14 +5,13 @@ module.exports = async function (bot) {
   try {
     // Получаем список всех чатов
     const allChats = await getAllChats();
-
     // Проходимся по каждому чату
-     const nameTgk = "@winepubgm";
+    const nameTgk = "@winepubgm";
   //  const nameTgk = "@prikolforward";
     for (const chat of allChats) {
       const chatId = chat.chat_id || chat.id || chat;
       try {
-        await handleChannelForward(bot, nameTgk, chatId);
+        await handleChannelForward(bot, nameTgk, chat.chat_id, chat.clan_id);
       } catch (err) {
         console.error(`⚠️ Ошибка при репосте в ${chatId}:`, err.message);
       }
