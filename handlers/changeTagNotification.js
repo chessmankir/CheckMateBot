@@ -1,4 +1,5 @@
 const pool = require('./db');
+const getClanId = require('../clan/getClanId');
 
 // Экранируем ВСЮ строку целиком под MarkdownV2
 function escapeMdV2(s) {
@@ -23,13 +24,12 @@ module.exports = function watchUsernameChanges(bot, notifyChatId, SpeadSheetId) 
 
       const actorId = msg.from.id;
       const currentUsername = msg.from.username ? `@${msg.from.username}` : null;
-
       const now = Date.now();
       const last = lastNotifiedAt.get(actorId) || 0;
       if (now - last < cooldownMinutes * 60 * 1000) return;
 
       const { rows } = await pool.query(
-        `SELECT telegram_tag
+        `SELECT telegram_tag, pubg_id, clan_id
            FROM clan_members
           WHERE actor_id = $1
           LIMIT 1`,
@@ -38,11 +38,12 @@ module.exports = function watchUsernameChanges(bot, notifyChatId, SpeadSheetId) 
       if (rows.length === 0) return;
 
       const dbTag = rows[0].telegram_tag || null;
-
+      const pubgId = rows[0].pubg_id || null;
+      const clanId = rows[0].clan_id || null;
+      if (clanId != 1) {return;}
       const norm = (s) => (s ? s.trim().toLowerCase() : null);
       if (norm(dbTag) === norm(currentUsername)){
         return;
-
       } 
       const whoRaw = msg.from.username
         ? `@${msg.from.username}`
@@ -51,7 +52,8 @@ module.exports = function watchUsernameChanges(bot, notifyChatId, SpeadSheetId) 
       const rawNotice =
         `⚠️ Пользователь ${whoRaw} изменил username\n` + // ← убрал точку в конце
         `В базе: ${dbTag || '—'}\n` +
-        `Сейчас: ${currentUsername || '—'}`;
+        `Сейчас: ${currentUsername || '—'}\n` +
+        `pubg id: ${pubgId}`;
 
       const targetChatId = notifyChatId ?? msg.chat.id;
       await sendMdV2(bot, targetChatId, rawNotice);
