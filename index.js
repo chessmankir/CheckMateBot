@@ -70,6 +70,7 @@ require("./update/setAge")(bot, auth, SPREADSHEET_ID);
 require("./update/setCity")(bot, auth, SPREADSHEET_ID);
 require("./update/setName")(bot, auth, SPREADSHEET_ID);
 require("./update/help")(bot);
+require("./update/setNote")(bot);
 require("./handlers/listNick")(bot);
 require("./handlers/changeTagNotification")(bot, notifyChatId, SPREADSHEET_ID);
 

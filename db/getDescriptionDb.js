@@ -23,7 +23,8 @@ module.exports = async function getPlayerDescriptionFromDb(telegramTagOrActorId)
       clan: row.clan,
       tgId: row.actor_id,
       clanId: row.clan_id,
-      active: row.active
+      active: row.active,
+      note: row.notes,
     };
   } catch (err) {
     console.error('Ошибка при запросе из базы:', err);

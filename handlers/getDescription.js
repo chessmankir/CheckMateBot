@@ -6,6 +6,7 @@ const isAllowedChat = require('./../admin/permissionChats');
 const isAdminChat = require('./../admin/permissionAdminChat');
 const { getUserStats } = require('../handlers/activityTracker');
 const getClanId = require('../clan/getClanId');
+const { policyanalyzer } = require('googleapis/build/src/apis/policyanalyzer');
 
 function escapeMarkdown(text) {
   if (!text) return '—';
@@ -117,6 +118,9 @@ module.exports = function (bot) {
 🎂 Возраст: ${escapeMarkdown(player.age)}
 📍 Город: ${escapeMarkdown(player.city)}
       `.trim();  
+      if(player.note != null){
+         text += `\n📒 ${escapeMarkdown(player.note)}`;
+      }
       
     const partner = await getPartner(key);
       if(partner != null){
