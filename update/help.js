@@ -2,12 +2,22 @@
 
 const isAdminChat = require('../admin/permissionAdminChat');
 
+function escapeMarkdown(text) {
+  if (!text) return '—';
+  return text
+    .replace(/_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/`/g, '\\`')
+    .replace(/\[/g, '\\[');
+}
+
 module.exports = function (bot) {
   bot.onText(/^!команды$/i, async (msg) => {
     const chatId = msg.chat.id;
+    console.log(chatId);
 
     const isAdminChatPermission = await isAdminChat(chatId);
-
+    console.log(isAdminChatPermission);
     if (isAdminChatPermission) {
       // ===== Панель администратора =====
       const adminText = `
@@ -47,7 +57,7 @@ module.exports = function (bot) {
 • \`+правила\` (в сообщении ниже — сам текст) — устанавливает/обновляет правила клана.
       `.trim();
 
-      return bot.sendMessage(chatId, adminText, { parse_mode: 'Markdown' });
+      return bot.sendMessage(chatId, escapeMarkdown(adminText), { parse_mode: 'Markdown' });
     }
 
     // ===== Обычные команды для участников =====
