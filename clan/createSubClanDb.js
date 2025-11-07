@@ -25,6 +25,11 @@ module.exports = async function createSubclan(clanId, leaderActorId, memberLimit
       [clanId, leaderActorId, inviteLink, limit, nextNumber]
     );
 
+    await db.query(
+      'UPDATE clan_members SET clan = $2 WHERE actor_id = $1',
+      [leaderActorId, nextNumber]
+    );
+
     return insertRes.rows[0];
   } catch (err) {
     // 🔹 Проверка на уникальность лидера

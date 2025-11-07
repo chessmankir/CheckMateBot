@@ -62,7 +62,7 @@ module.exports = function (bot) {
       // создаём подклан
       
       const sub = await createSubclan(clanId, leaderActorId, memberLimit, inviteLink);
-
+      
       await bot.sendMessage(
         chatId,
         [

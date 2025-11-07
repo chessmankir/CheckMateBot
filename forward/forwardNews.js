@@ -9,11 +9,11 @@ module.exports = async function (bot) {
     const nameTgk = "@winepubgm";
   //  const nameTgk = "@prikolforward";
     for (const chat of allChats) {
-      const chatId = chat.chat_id || chat.id || chat;
+     // const chatId = chat.chat_id || chat.id || chat;
       try {
         await handleChannelForward(bot, nameTgk, chat.chat_id, chat.clan_id);
       } catch (err) {
-        console.error(`⚠️ Ошибка при репосте в ${chatId}:`, err.message);
+        console.error(`⚠️ Ошибка при репосте в ${chat.chat_id}:`, err.message);
       }
     }
   } catch (err) {

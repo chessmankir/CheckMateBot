@@ -11,15 +11,11 @@ module.exports = function profileInviteCallback(bot, wizardState) {
     if (!s) return;
     const chatId = q.message.chat.id;
     if (s.step === 'registration_invite_profile') {
-      console.log('stet');
-      console.log(userId);
-      console.log(s);
       if (q.data === 'profile_invite_continue') {    
         console.log("comtinue");
         s.step = 'finalize_registration'; // переходим к финальному шагу
         wizardState.set(userId, s);
         const player = await getPlayerDescription(userId);
-        console.log(player);
         let target_username = null;
         if (q.from.username) {
             target_username = '@' + q.from.username.trim();
@@ -42,6 +38,10 @@ module.exports = function profileInviteCallback(bot, wizardState) {
         try {
 
           await saveMemberDb(dataToSave);
+          await db.query(
+            'UPDATE clan_members SET active = TRUE WHERE actor_id = $1',
+            [userId]
+          );
          /* await db.query('UPDATE invites SET is_active = false WHERE invite_code = $1', [
             user.data.inviteCode
           ]);*/

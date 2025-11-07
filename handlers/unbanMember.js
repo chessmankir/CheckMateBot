@@ -27,7 +27,6 @@ module.exports = function (bot) {
       }
 
       const member = res.rows[0];
-      console.log(member);
       // Обновляем в базе
       await db.query(
         'UPDATE clan_members SET active = TRUE WHERE lower(telegram_tag) = $1',
