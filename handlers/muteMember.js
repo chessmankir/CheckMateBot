@@ -1,8 +1,8 @@
 // const db = require('../handlers/db');
 const isAdminChat = require('../admin/permissionAdminChat');
 const getPlayerDescription = require('./../db/getDescriptionDb');
-const getAllChats = require("../clan/getAllChats");
-// const getClanId = require('../clan/getClanId');
+const getAllChats = require("../clan/getClanChat");
+const getClanId = require('../clan/getClanId');
 // const getClanChats = require('../clan/getClanChats');
 
 module.exports = function (bot) {
@@ -28,36 +28,37 @@ module.exports = function (bot) {
 
     try {
       // Получаем участника по username
-      console.log(username);
       const player = await getPlayerDescription(username);
-      console.log(player);
       const userId = player.tgId;
-      console.log(userId);
       // Ограничиваем возможность писать
-      const res = await bot.restrictChatMember(chatId, userId, {
+      const clanId = await getClanId(chatId);  
+      const allChats = await getAllChats(clanId);
+      for (const chat of allChats) {
+      try{
+       const res = await bot.restrictChatMember(chat, userId, {
         permissions: {
           can_send_messages: false,
           can_send_media_messages: false,
           can_send_other_messages: false,
           can_add_web_page_previews: false
-        },
-        until_date: untilDate
-      });
-      console.log(res);
-
+         },
+          until_date: untilDate
+       });
+      }
+       catch{}
+      }
       // Уведомление в чат
       await bot.sendMessage(chatId, 
         `🔇 ${username} лишается права слова на *${durationValue} ${durationUnit}*\n`,
        // `💬 Причина: ${reason}\n` +
       //  `🧑‍⚖️ Модератор: ${moderator}`, 
         { parse_mode: 'Markdown',
-          reply_to_message_id: msg.message_id
+         reply_to_message_id: msg.message_id
         }
       );
-
     } catch (err) {
       console.error('Ошибка при муте:', err);
-      bot.sendMessage(chatId, `❌ Не удалось выдать мут для ${username}. Возможно, бот не администратор или пользователь не найден.`);
+      bot.sendMessage(chatId, `❌ Не удалось выдать мут для ${username}. Возможно, бот не администратор или пользователь не найден.`, {reply_to_message_id: msg.message_id});
     }
   });
 };
