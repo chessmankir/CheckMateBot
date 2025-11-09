@@ -6,7 +6,7 @@ const isAllowedChat = require('./../admin/permissionChats');
 const isAdminChat = require('./../admin/permissionAdminChat');
 const { getUserStats } = require('../handlers/activityTracker');
 const getClanId = require('../clan/getClanId');
-const getBanReason = require('../db/getBanReason')
+const getBanReason = require('../db/getBanReason');
 const { policyanalyzer } = require('googleapis/build/src/apis/policyanalyzer');
 
 function escapeMarkdown(text) {
