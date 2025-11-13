@@ -13,16 +13,15 @@ function escapeHtml(s = "") {
 
 // Пауза, чтобы не попасть под лимиты Telegram
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-console.log("adv");
+
 module.exports = function (bot) {
     bot.onText(/^\+объявление\s+([\s\S]+)/, async (msg, match) => {
-    console.log("advertisement");
     const chatId = msg.chat.id;
 
     // Только админ-чаты
     const allowed = await isAdminChat(chatId);
     if (!allowed) return;
-    console.log("admin");
+
     // Текст после команды
     const text = (match?.[1] || '').trim();
 
@@ -35,7 +34,6 @@ module.exports = function (bot) {
 
     // clan_id для этого чата
     const clanId = await getClanId(chatId);
-    console.log(clanId);
     if (!clanId) {
       return bot.sendMessage(
         chatId,
@@ -69,11 +67,10 @@ module.exports = function (bot) {
         "⚠️ Нет участников с активным личным чатом бота (telegram_id)."
       );
     }
-   console.log(ids);
+
     const options = { parse_mode: "HTML", disable_web_page_preview: true };
     const body = escapeHtml(text);
-    console.log(ids);
-    
+
     let ok = 0;
     const failed = [];
 
