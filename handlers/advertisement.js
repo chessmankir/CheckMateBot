@@ -24,7 +24,8 @@ module.exports = function (bot) {
 
     // Текст после команды
     const text = (match?.[1] || '').trim();
-
+    console.log((text));
+      return
     if (!text) {
       return bot.sendMessage(
         chatId,
