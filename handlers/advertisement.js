@@ -24,8 +24,6 @@ module.exports = function (bot) {
 
     // Текст после команды
     const text = (match?.[1] || '').trim();
-    console.log((text));
-      return
     if (!text) {
       return bot.sendMessage(
         chatId,
@@ -70,8 +68,8 @@ module.exports = function (bot) {
     }
 
     const options = { parse_mode: "HTML", disable_web_page_preview: true };
-    const body = escapeHtml(text);
-
+    const body = escapeHtml(text) + "\n(сообщение сгененировано админстраицей клана)";
+   
     let ok = 0;
     const failed = [];
 
@@ -98,13 +96,12 @@ module.exports = function (bot) {
       "📢 <b>Рассылка завершена</b>",
       `✅ Доставлено: <b>${ok}</b>`,
       `❌ Не доставлено: <b>${failed.length}</b>`,
-      failed.length ? "\n<em>Примеры ошибок:</em>" : "",
       failLines.join("\n"),
       more,
     ]
       .filter(Boolean)
       .join("\n");
 
-    await bot.sendMessage(chatId, summary, { parse_mode: "HTML" });
+    await bot.sendMessage(chatId, summary, { parse_mode: "HTML", reply_to_message_id: msg.message_id, });
   });
 };
