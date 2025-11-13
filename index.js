@@ -8,7 +8,7 @@ const {
 // test web
 
 require("dotenv").config(); // Загружает переменные из .env
-const token = process.env.TELEGRAM_TOKEN;
+const token = process.env.TELEGRAM_TOKEN2;
 
 const bot = new TelegramBot(token, {
   polling: {
@@ -81,6 +81,7 @@ require("./handlers/copyMembersToDb")(bot, auth, SPREADSHEET_ID);
 require("./handlers/findMember")(bot, auth, SPREADSHEET_ID);
 require("./handlers/ruleClan")(bot, auth, SPREADSHEET_ID);
 require("./handlers/afterJoinMember")(bot, auth, SPREADSHEET_ID);
+require("./handlers/advertisement")(bot);
 
 require("./handlers/deleteAccounts")(bot);
 require("./handlers/activityTracker")(bot);
