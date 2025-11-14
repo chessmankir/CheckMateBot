@@ -10,6 +10,7 @@ module.exports = function registerCreateTournament(bot) {
     if (!isAdmin) return;
 
     const clanId = await getClanId(chatId);
+    if (clanId != 1){return;}
     if (!clanId) {
       return bot.sendMessage(chatId, '❌ Этот чат не привязан к клану.', {
         reply_to_message_id: msg.message_id,
