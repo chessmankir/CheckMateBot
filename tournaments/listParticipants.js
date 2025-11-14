@@ -81,7 +81,13 @@ module.exports = function registerParticipantsListCommand(bot) {
       lines.push(
         `Турнир: ${tournament.name}`,
         `Размер команды: ${tournament.team_size}`,
-        `Дата создания: ${new Date(tournament.created_at).toLocaleString('ru-RU')}`,
+        `Дата проведения: ${new Date(tournament.created_at).toLocaleString('ru-RU', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`,
         `Статус: 🔵 активный`,
         ''
       );
