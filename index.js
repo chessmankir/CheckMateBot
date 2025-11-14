@@ -97,6 +97,10 @@ require("./update/setPubgId")(bot, auth, SPREADSHEET_ID);
 require("./handlers/saveActorIdbyMessage")(bot, auth, SPREADSHEET_ID);
 require("./handlers/getTelegramInfo")(bot);
 
+require("./tournaments/tournament")(bot);
+require("./tournaments/participants")(bot);
+require("./tournaments/listParticipants")(bot);
+
 require("./clan/setInviteLink")(bot);
 require("./clan/setInviteMemberLimit")(bot);
 const testData = require("./handlers/testData");
