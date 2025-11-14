@@ -97,7 +97,7 @@ module.exports = function registerCastsCommand(bot) {
         [tournament.id]
       );
 
-      const nextTeamNo = (teamRes.rows[0].max_team || 0) + 2;
+      const nextTeamNo = (teamRes.rows[0].max_team || 1) + 1;
 
       // 4. Записываем участников
       const values = [];
