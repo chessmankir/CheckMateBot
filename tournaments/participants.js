@@ -22,7 +22,6 @@ module.exports = function registerCastsCommand(bot) {
 
     const tail = (match[1] || '').trim();
     const rawIds = tail.split(/[\n\r\s]+/).map(normDigits).filter(Boolean);
-    console.log(rawIds);
     if (rawIds.length === 0) {
       return bot.sendMessage(
         chatId,
@@ -45,6 +44,7 @@ module.exports = function registerCastsCommand(bot) {
       );
 
       if (tRes.rowCount === 0) {
+        return;
         return bot.sendMessage(
           chatId,
           '⚠️ Нет активного турнира. Создайте его командой:\n+турнир 3 Касты #1',
@@ -56,6 +56,7 @@ module.exports = function registerCastsCommand(bot) {
       const teamSize = tournament.team_size;
 
       const ids = rawIds.slice(0, teamSize);
+      console.log(ids);
       if (ids.length < teamSize) {
         return bot.sendMessage(
           chatId,
@@ -76,7 +77,7 @@ module.exports = function registerCastsCommand(bot) {
         `,
         params
       );
-
+      console.log(res);
       if (res.rowCount !== ids.length) {
         const found = res.rows.map(r => String(r.pubg_id));
         const missing = ids.filter(id => !found.includes(id));
