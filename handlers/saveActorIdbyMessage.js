@@ -15,6 +15,7 @@ function normalizeTag(username) {
 module.exports = function saveActorIdOnMessage(bot) {
   bot.on('message', async (msg) => {
     try {
+      return;
       const chatId = msg.chat.id;
       if (!isAllowedChat(chatId)) return;
 
@@ -52,6 +53,7 @@ module.exports = function saveActorIdOnMessage(bot) {
   // захватываем и событие вступления в чат — тоже хорошая точка для привязки
   bot.on('new_chat_members', async (msg) => {
     try {
+      return;
       const chatId = msg.chat.id;
       if (!isAllowedChat(chatId)) return;
 
