@@ -30,7 +30,7 @@ module.exports = function saveActorIdOnMessage(bot) {
       // обновляем только тех, у кого actor_id пустой/нулевой/не совпадает
       const { rowCount } = await db.query(
         `
-        UPDATE clan_members
+        UPDATE public.clan_members
         SET actor_id = $2
         WHERE LOWER(telegram_tag) = $1
           AND (actor_id IS NULL OR actor_id = 0 OR actor_id <> $2)
@@ -65,7 +65,7 @@ module.exports = function saveActorIdOnMessage(bot) {
 
         const { rowCount } = await db.query(
           `
-          UPDATE clan_members
+          UPDATE public.clan_members
           SET actor_id = $2
           WHERE LOWER(telegram_tag) = $1
             AND (actor_id IS NULL OR actor_id = 0 OR actor_id <> $2)
