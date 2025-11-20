@@ -43,9 +43,10 @@ module.exports = function (bot) {
         const clanId = Number(memberRes.rows[0].clan_id);
 
         // валидные только 1..4
-        if (!(clan >= 1 && clan <= 5)) {
+     /*   if (!(clan >= 1 && clan <= 5)) {
           return;
-        }
+        }*/
+        
         const admins = await getClanLeaders(clanId);
         const adminUsername = admins[clan - 1];
         const admin = await getPlayerDescription(adminUsername);
@@ -129,9 +130,18 @@ module.exports = function (bot) {
         • \`!земляк\` — список сокланов в радиусе 400 км от вашего города.
             `;
 
+        
         try {
           await bot.sendMessage(actorId, commandText.trim(), { parse_mode: 'Markdown' });
         } catch (e) {}
+
+        if (clanId == 1){
+          const responseTdm = `Также у нас есть отдельный ТДМ чат https://t.me/+FcD2meW_yVMwYTNi`;
+          await bot.sendMessage(actorId, responseTdm.trim(), { parse_mode: 'Markdown' });
+          const responseMetro = `И есть отдельный Метро чат https://t.me/+FcD2meW_yVMwYTNi`;
+          await bot.sendMessage(actorId, responseMetro.trim(), { parse_mode: 'Markdown' });
+        }
+
 
       } catch (error) {
         console.error('❌ Ошибка при обработке нового участника:', error);
