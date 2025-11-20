@@ -138,7 +138,7 @@ module.exports = function (bot) {
         if (clanId == 1){
           const responseTdm = `Также у нас есть отдельный ТДМ чат https://t.me/+FcD2meW_yVMwYTNi`;
           await bot.sendMessage(actorId, responseTdm.trim(), { parse_mode: 'Markdown' });
-          const responseMetro = `И есть отдельный Метро чат https://t.me/+FcD2meW_yVMwYTNi`;
+          const responseMetro = `И есть отдельный Метро чат https://t.me/+MV5ObXuvM9s4Yzgy`;
           await bot.sendMessage(actorId, responseMetro.trim(), { parse_mode: 'Markdown' });
         }
 
