@@ -100,6 +100,8 @@ require("./handlers/getTelegramInfo")(bot);
 require("./tournaments/tournament")(bot);
 require("./tournaments/participants")(bot);
 require("./tournaments/listParticipants")(bot);
+require("./tournaments/removeTeam")(bot);
+require("./tournaments/lobby")(bot);
 
 require("./clan/setInviteLink")(bot);
 require("./clan/setInviteMemberLimit")(bot);
