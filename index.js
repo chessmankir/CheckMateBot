@@ -102,6 +102,7 @@ require("./tournaments/participants")(bot);
 require("./tournaments/listParticipants")(bot);
 require("./tournaments/removeTeam")(bot);
 require("./tournaments/lobby")(bot);
+require("./tournaments/ocrResults")(bot);
 
 require("./clan/setInviteLink")(bot);
 require("./clan/setInviteMemberLimit")(bot);
