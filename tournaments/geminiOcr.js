@@ -1,6 +1,8 @@
 const fetch = require('node-fetch');
 const isAdminChat = require('../admin/permissionAdminChat');
 const extractTeamsFromImageUrl = require('./geminiExtractTeams'); // новый модуль
+const saveMapResultsToDb = require('./saveMapResultsDb');
+const getClanId = require('../clan/getClanId');
 
 // максимум 5 картинок из альбома
 const MAX_IMAGES = 5;
@@ -83,7 +85,14 @@ module.exports = function registerOcrResultsHandler(bot) {
     const caption = (msg.caption || '').trim();
 
     // Триггерим ЛЮБОЙ кейс только если есть команда !результа3
-    const isTrigger = /^!результаты3/i.test(caption);
+    // const isTrigger = /^!результаты3/i.test(caption);
+
+    // ищем команду !результатыN
+    const match = caption.match(/^!результаты(\d+)(?:\s|$)/i);
+
+    const isTrigger = !!match;
+    const mapNo = match ? parseInt(match[1], 10) : null;
+
 
     /* ---------- Одиночное фото ---------- */
     if (!groupId) {
@@ -125,7 +134,7 @@ module.exports = function registerOcrResultsHandler(bot) {
       mediaGroups.delete(groupId);
 
       // Обрабатываем альбом только если где-то в нём была команда !результа3
-      if (!/^!результаты3/i.test(group.caption)) return;
+      if (!/^!результаты/i.test(group.caption)) return;
 
       // Берём не больше MAX_IMAGES картинок, в порядке сообщений
       const sorted = group.photos
@@ -137,7 +146,8 @@ module.exports = function registerOcrResultsHandler(bot) {
         bot,
         group.chatId,
         sorted,
-        group.firstMessageId
+        group.firstMessageId, 
+        mapNo
       );
     }, 800);
   });
@@ -145,8 +155,9 @@ module.exports = function registerOcrResultsHandler(bot) {
 
 /* ===================== ОБРАБОТКА МАССИВА КАРТИНОК ===================== */
 
-async function processImagesArray(bot, chatId, items, replyToMessageId) {
+async function processImagesArray(bot, chatId, items, replyToMessageId, numberMap) {
   console.log('массив');
+  const clanId = await getClanId(chatId);
   if (!process.env.GEMINI_API_KEY) {
     return bot.sendMessage(chatId, '❌ Нет GEMINI_API_KEY', {
       reply_to_message_id: replyToMessageId,
@@ -192,8 +203,49 @@ async function processImagesArray(bot, chatId, items, replyToMessageId) {
   // Финальный JSON
   const json = JSON.stringify(sortedWithPts, null, 2);
 
+  const messageText = formatTeamsMessage(sortedWithPts);
+ // bot.sendMessage(chatId, messageText);
+
+  const withRank = sortedWithPts.map((t, i) => ({
+    ...t,
+    rank: i + 1
+  }));
+
+  // сохраняем в БД уже по clan_id
+  try {
+    await saveMapResultsToDb(clanId, mapNo, withRank);
+  } catch (err) {
+  
+  }
+
   // Без parse_mode, чтобы не мучиться с экранированием
-  return bot.sendMessage(chatId, json.slice(0, 3900), {
+  return bot.sendMessage(chatId, messageText, {
     reply_to_message_id: replyToMessageId,
   });
 }
+
+function formatTeamsMessage(teams) {
+  if (!Array.isArray(teams) || !teams.length) {
+    return "Нет данных.";
+  }
+
+  const lines = [];
+
+  teams.forEach((team, index) => {
+    const num = index + 1;
+
+    // игроки в строку: "ник1 + ник2 + ник3"
+    const names = team.players.map(p => p.name).join(" + ");
+
+    const totalPts = team.totalPts ?? 0;
+    const kills = team.totalKills ?? 0;
+    const placementPts = team.placementPts ?? 0;
+
+    lines.push(
+      `${num}) ${names} — ${totalPts} pts (${kills} киллов + ${placementPts} плейсмент)`
+    );
+  });
+
+  return lines.join("\n");
+}
+

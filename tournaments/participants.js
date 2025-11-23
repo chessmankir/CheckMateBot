@@ -58,13 +58,13 @@ module.exports = function registerCastsCommand(bot) {
 
       const ids = rawIds.slice(0, teamSize);
       console.log(ids);
-      if (ids.length < teamSize) {
+    /*  if (ids.length < teamSize) {
         return bot.sendMessage(
           chatId,
           `⚠️ Размер команды: ${teamSize}. Нужно указать минимум ${teamSize} игроков.`,
           { reply_to_message_id: msg.message_id }
         );
-      }
+      } */
 
       // 2. Ищем игроков в clan_members
       const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
