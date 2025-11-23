@@ -2,6 +2,15 @@ const db = require('../handlers/db');
 const isAdminChat = require('../admin/permissionAdminChat');
 const getClanId = require('../clan/getClanId');
 
+function escapeMarkdown(text) {
+  if (!text) return '—';
+  return text
+    .replace(/_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(/`/g, '\\`')
+    .replace(/\[/g, '\\[');
+}
+
 module.exports = function registerSendLobbyCommand(bot) {
   bot.onText(/^\+лобби\s+([\s\S]+)/, async (msg, match) => {
     const chatId = msg.chat.id;
@@ -88,18 +97,18 @@ module.exports = function registerSendLobbyCommand(bot) {
         try {
           await bot.sendMessage(
             actorId,
-            `📢 *ЛОББИ ТУРНИРА*\n\n${lobbyText}`,
+            `📢 *ЛОББИ ТУРНИРА*\n\n${escapeMarkdown(lobbyText)}`,
             { parse_mode: 'Markdown' }
           );
-          sent.push(`• ${u.nickname || u.telegram_tag}`);
+          sent.push(`• ${escapeMarkdown(u.nickname) || escapeMarkdown(u.telegram_tag)}`);
         } catch (e) {
-          failed.push(`• ${u.nickname || u.telegram_tag} — не могу написать`);
+          failed.push(`• ${escapeMarkdown(u.nickname) || escapeMarkdown(u.telegram_tag)} — не могу написать`);
         }
       }
 
       // 4) Ответ в админ-чат
       let report = [];
-      report.push(`📨 Рассылка лобби для турнира *"${tournament.name}"* завершена.\n`);
+      report.push(`📨 Рассылка лобби для турнира *"${escapeMarkdown(tournament.name)}"* завершена.\n`);
       report.push('✅ Отправлено:');
       report.push(sent.length ? sent.join('\n') : '—');
 
