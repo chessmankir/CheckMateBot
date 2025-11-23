@@ -96,7 +96,6 @@ async function extractTeamsFromImageUrl(imageUrl) {
   });
 
   const jsonText = geminiRes.response.text().trim();
-  console.log(jsonText);
 
   let clean = jsonText
     .replace(/```json/gi, '')

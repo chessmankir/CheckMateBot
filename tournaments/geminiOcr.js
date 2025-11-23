@@ -88,7 +88,7 @@ module.exports = function registerOcrResultsHandler(bot) {
     // const isTrigger = /^!результаты3/i.test(caption);
 
     // ищем команду !результатыN
-    const match = caption.match(/^!езультаты(\d+)(?:\s|$)/i);
+    const match = caption.match(/^!результаты(\d+)(?:\s|$)/i);
 
     const isTrigger = !!match;
     const mapNo = match ? parseInt(match[1], 10) : null;
@@ -134,7 +134,7 @@ module.exports = function registerOcrResultsHandler(bot) {
       mediaGroups.delete(groupId);
 
       // Обрабатываем альбом только если где-то в нём была команда !результа3
-      if (!/^!езультаты/i.test(group.caption)) return;
+      if (!/^!результаты/i.test(group.caption)) return;
 
       // Берём не больше MAX_IMAGES картинок, в порядке сообщений
       const sorted = group.photos
@@ -204,16 +204,20 @@ async function processImagesArray(bot, chatId, items, replyToMessageId, numberMa
   const json = JSON.stringify(sortedWithPts, null, 2);
 
   const messageText = formatTeamsMessage(sortedWithPts);
- // bot.sendMessage(chatId, messageText);
+  const headerResult = `Результаты карты №${numberMap}\n\n`;
+  bot.sendMessage(chatId, headerResult + messageText, {
+     reply_to_message_id: replyToMessageId 
+  });
 
   const withRank = sortedWithPts.map((t, i) => ({
     ...t,
     rank: i + 1
   }));
-
+  console.log(withRank);
+  
   // сохраняем в БД уже по clan_id
   try {
-    await saveMapResultsToDb(clanId, mapNo, withRank);
+   // await saveMapResultsToDb(clanId, numberMap, withRank);
   } catch (err) {
   
   }
