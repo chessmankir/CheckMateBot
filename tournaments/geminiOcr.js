@@ -88,7 +88,7 @@ module.exports = function registerOcrResultsHandler(bot) {
     // const isTrigger = /^!результаты3/i.test(caption);
 
     // ищем команду !результатыN
-    const match = caption.match(/^!результаты(\d+)(?:\s|$)/i);
+    const match = caption.match(/^!езультаты(\d+)(?:\s|$)/i);
 
     const isTrigger = !!match;
     const mapNo = match ? parseInt(match[1], 10) : null;
@@ -134,7 +134,7 @@ module.exports = function registerOcrResultsHandler(bot) {
       mediaGroups.delete(groupId);
 
       // Обрабатываем альбом только если где-то в нём была команда !результа3
-      if (!/^!результаты/i.test(group.caption)) return;
+      if (!/^!езультаты/i.test(group.caption)) return;
 
       // Берём не больше MAX_IMAGES картинок, в порядке сообщений
       const sorted = group.photos

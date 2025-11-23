@@ -22,8 +22,6 @@ module.exports = function registerSendLobbyCommand(bot) {
       );
     }
 
-    console.log('+лобби', lobbyText);
-
     const isAdmin = await isAdminChat(chatId);
     if (!isAdmin) return;
 
@@ -85,7 +83,7 @@ module.exports = function registerSendLobbyCommand(bot) {
 
       // 3) Рассылaем сообщения каждому игроку
       for (const u of pRes.rows) {
-        console.log(u);
+        // console.log(u);
         if (!u.telegram_tag) {
           failed.push(`• ${u.nickname || 'Без ника'} — нет telegram_tag`);
           continue;
