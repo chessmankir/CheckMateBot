@@ -1,11 +1,11 @@
 const fetch = require('node-fetch');
 const isAdminChat = require('../admin/permissionAdminChat');
 const extractTeamsFromImageUrl = require('./geminiExtractTeams'); // новый модуль
-const saveMapResultsToDb = require('./saveMapResultsDb');
+const saveMapResultToDb = require('./saveMapResultDB');
 const getClanId = require('../clan/getClanId');
 
 // максимум 5 картинок из альбома
-const MAX_IMAGES = 5;
+const MAX_IMAGES = 9;
 
 // для хранения media_group
 const mediaGroups = new Map();
@@ -80,6 +80,8 @@ module.exports = function registerOcrResultsHandler(bot) {
     const chatId = msg.chat.id;
     const isAdmin = await isAdminChat(chatId);
     if (!isAdmin) return;
+    const clanId = await getClanId(chatId);
+    if (clanId != 1){return;}
 
     const groupId = msg.media_group_id;
     const caption = (msg.caption || '').trim();
@@ -89,11 +91,13 @@ module.exports = function registerOcrResultsHandler(bot) {
 
     // ищем команду !результатыN
     const match = caption.match(/^!результаты(\d+)(?:\s|$)/i);
+    console.log(match);
+ 
 
     const isTrigger = !!match;
     const mapNo = match ? parseInt(match[1], 10) : null;
-
-
+    console.log(mapNo);
+ //   return;
     /* ---------- Одиночное фото ---------- */
     if (!groupId) {
       if (!isTrigger) return;
@@ -103,7 +107,8 @@ module.exports = function registerOcrResultsHandler(bot) {
         bot,
         chatId,
         [{ fileId, messageId: msg.message_id }],
-        msg.message_id
+        msg.message_id,
+        mapNo
       );
     }
 
@@ -114,6 +119,8 @@ module.exports = function registerOcrResultsHandler(bot) {
         chatId,
         photos: [],
         caption: '',
+        mapNo: null,        // сохраняем номер карты
+        hasTrigger: false,  // нашли ли !результаты
         firstMessageId: msg.message_id,
         timeout: null,
       };
@@ -126,7 +133,14 @@ module.exports = function registerOcrResultsHandler(bot) {
     if (caption) {
       group.caption = caption;
       group.firstMessageId = msg.message_id;
+
+      const match = caption.match(/^!результаты(\d+)(?:\s|$)/i);
+      if (match) {
+        group.mapNo = parseInt(match[1], 10);  
+        group.hasTrigger = true;
+      }
     }
+
 
     if (group.timeout) clearTimeout(group.timeout);
 
@@ -147,7 +161,7 @@ module.exports = function registerOcrResultsHandler(bot) {
         group.chatId,
         sorted,
         group.firstMessageId, 
-        mapNo
+        group.mapNo
       );
     }, 800);
   });
@@ -156,7 +170,8 @@ module.exports = function registerOcrResultsHandler(bot) {
 /* ===================== ОБРАБОТКА МАССИВА КАРТИНОК ===================== */
 
 async function processImagesArray(bot, chatId, items, replyToMessageId, numberMap) {
-  console.log('массив');
+  console.log('massiv');
+  console.log(numberMap);
   const clanId = await getClanId(chatId);
   if (!process.env.GEMINI_API_KEY) {
     return bot.sendMessage(chatId, '❌ Нет GEMINI_API_KEY', {
@@ -199,33 +214,36 @@ async function processImagesArray(bot, chatId, items, replyToMessageId, numberMa
   }
 
   const sortedWithPts = calcAndSortTeams(allTeams);
-
+ 
   // Финальный JSON
   const json = JSON.stringify(sortedWithPts, null, 2);
-
   const messageText = formatTeamsMessage(sortedWithPts);
   const headerResult = `Результаты карты №${numberMap}\n\n`;
-  bot.sendMessage(chatId, headerResult + messageText, {
+  const texMsg = headerResult + messageText;
+ bot.sendMessage(chatId, texMsg , {
      reply_to_message_id: replyToMessageId 
-  });
-
+  }); 
+  
   const withRank = sortedWithPts.map((t, i) => ({
     ...t,
     rank: i + 1
   }));
-  console.log(withRank);
+
+  /*bot.sendMessage(chatId, messageText, {
+    reply_to_message_id: replyToMessageId,
+  });*/
   
   // сохраняем в БД уже по clan_id
   try {
-   // await saveMapResultsToDb(clanId, numberMap, withRank);
+    await  saveMapResultToDb(1, numberMap, sortedWithPts);
   } catch (err) {
   
   }
 
   // Без parse_mode, чтобы не мучиться с экранированием
-  return bot.sendMessage(chatId, messageText, {
+ /* return bot.sendMessage(chatId, messageText, {
     reply_to_message_id: replyToMessageId,
-  });
+  }); */
 }
 
 function formatTeamsMessage(teams) {

@@ -206,6 +206,8 @@ module.exports = function registerOcrResultsHandler(bot) {
   bot.on('photo', async msg => {
     const chatId = msg.chat.id;
     const isAdmin = await isAdminChat(chatId);
+    const clanId = await getClanId(chatId);
+    if (clanId != 1){return;}
     if (!isAdmin) return;
 
     const groupId = msg.media_group_id;
