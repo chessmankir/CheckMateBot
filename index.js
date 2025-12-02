@@ -17,6 +17,7 @@ const bot = new TelegramBot(token, {
     },
   },
 });
+
 // Обработка ошибок polling
 bot.on("polling_error", (error) => {
   console.log("Детали ошибки polling:", error.code, error.message);
