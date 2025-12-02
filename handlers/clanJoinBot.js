@@ -6,7 +6,7 @@ const getPlayerDescription = require('./../db/getDescriptionDb');
 const getClan = require('../clan/getClan');
 const getSubClan = require('../clan/getSubClan');
 const profileInviteCallback = require('../startWelcome/registerProfileInvite');
-const usersInProcess = new Map();
+const usersInProcess = require("../clan/stateWiizard");
 
 function hasUsername(from) {
   // username должен быть не пустой строкой
@@ -70,6 +70,8 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
     if (query.data === 'join_clan') {
       await bot.answerCallbackQuery(query.id);
 
+      wizardState.delete(userId);
+      
       if (!hasUsername(query.from)) {
         // Нет username — объясняем и даём кнопку на повторную проверку
         return bot.sendMessage(chatId,
@@ -249,11 +251,23 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
     }
 
     // Шаг 2 — PUBG ID
+    // Шаг 2 — PUBG ID
     if (user.step === 'pubg_id') {
-      user.data.pubg_id = text;
+      // проверяем, что только цифры
+      const pubgId = text.replace(/\D+/g, ""); 
+
+      if (!pubgId || pubgId.length < 5 || pubgId.length > 15) {
+        return bot.sendMessage(
+          chatId,
+          "❌ PUBG ID должен состоять только из цифр.\nПопробуй ввести снова:"
+        );
+      }
+
+      user.data.pubg_id = pubgId;
       user.step = 'name';
       return bot.sendMessage(chatId, 'Введи своё имя:');
     }
+
 
     // Шаг 3 — имя
     if (user.step === 'name') {

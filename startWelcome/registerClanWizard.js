@@ -7,7 +7,8 @@ const deactivateOwnerClans = require("../clan/deactivateOwnerClans");
 const deactivateClanInviteDB = require("../db/deactivateClanInviteDB");
 
 const FALLBACK_CODE = process.env.CLAN_VERIFY_CODE || "417";
-const wizardState = new Map();
+const wizardState = require("../clan/stateWiizard"); 
+
 
 function escapeMarkdown(text) {
   if (!text) return '—';

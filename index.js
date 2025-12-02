@@ -107,6 +107,12 @@ require("./tournaments/lobby")(bot);
 require("./tournaments/geminiOcr")(bot);
 require("./tournaments/viewTournamentResults")(bot);
 
+// require("./apiPubg/commandInfo")(bot);
+require("./premium/premium")(bot);
+require("./premium/premiumPayment")(bot);
+require("./premium/premiumSuccess")(bot);
+
+
 require("./clan/setInviteLink")(bot);
 require("./clan/setInviteMemberLimit")(bot);
 const testData = require("./handlers/testData");
