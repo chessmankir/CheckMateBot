@@ -6,7 +6,8 @@ const getPlayerDescription = require('./../db/getDescriptionDb');
 const getClan = require('../clan/getClan');
 const getSubClan = require('../clan/getSubClan');
 const profileInviteCallback = require('../startWelcome/registerProfileInvite');
-const usersInProcess = require("../clan/stateWiizard");
+// const usersInProcess = new Map();
+
 
 function hasUsername(from) {
   // username должен быть не пустой строкой
@@ -23,6 +24,7 @@ function escapeMarkdown(text) {
 }
 
 module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
+  const usersInProcess = require("../clan/stateWiizard");
   profileInviteCallback(bot, usersInProcess);
   // /start — только в личке
   bot.onText(/^\/start$/, (msg) => {
@@ -70,7 +72,7 @@ module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
     if (query.data === 'join_clan') {
       await bot.answerCallbackQuery(query.id);
 
-      wizardState.delete(userId);
+      usersInProcess.delete(userId);
       
       if (!hasUsername(query.from)) {
         // Нет username — объясняем и даём кнопку на повторную проверку
