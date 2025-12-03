@@ -6,7 +6,7 @@ const getPlayerDescription = require('./../db/getDescriptionDb');
 const getClan = require('../clan/getClan');
 const getSubClan = require('../clan/getSubClan');
 const profileInviteCallback = require('../startWelcome/registerProfileInvite');
-// const usersInProcess = new Map();
+const usersInProcess = new Map();
 
 
 function hasUsername(from) {
@@ -24,7 +24,7 @@ function escapeMarkdown(text) {
 }
 
 module.exports = function (bot, notifyChatId, inviteLink1, inviteLink2) {
-  const usersInProcess = require("../clan/stateWiizard");
+ // const usersInProcess = require("../clan/stateWiizard");
   profileInviteCallback(bot, usersInProcess);
   // /start — только в личке
   bot.onText(/^\/start$/, (msg) => {
