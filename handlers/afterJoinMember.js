@@ -134,15 +134,13 @@ module.exports = function (bot) {
         try {
           await bot.sendMessage(actorId, commandText.trim(), { parse_mode: 'Markdown' });
         } catch (e) {}
-
+      
         if (clanId == 1){
-          const responseTdm = `Также у нас есть отдельный ТДМ чат https://t.me/+FcD2meW_yVMwYTNi`;
+          const responseTdm = escapeMd(`Также у нас есть отдельный ТДМ чат https://t.me/+FcD2meW_yVMwYTNi`);
           await bot.sendMessage(actorId, responseTdm.trim(), { parse_mode: 'Markdown' });
-          const responseMetro = `И есть отдельный Метро чат https://t.me/+MV5ObXuvM9s4Yzgy`;
+          const responseMetro = escapeMd(`И есть отдельный Метро чат https://t.me/+MV5ObXuvM9s4Yzgy`);
           await bot.sendMessage(actorId, responseMetro.trim(), { parse_mode: 'Markdown' });
         }
-
-
       } catch (error) {
         console.error('❌ Ошибка при обработке нового участника:', error);
       }
