@@ -107,6 +107,8 @@ require("./tournaments/lobby")(bot);
 // require("./tournaments/ocrResults2")(bot);
 require("./tournaments/geminiOcr")(bot);
 require("./tournaments/viewTournamentResults")(bot);
+require("./tournaments/finishTournament")(bot);
+require("./tournaments/dateTournament")(bot);
 
 // require("./apiPubg/commandInfo")(bot);
 require("./premium/premium")(bot);
