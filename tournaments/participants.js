@@ -78,7 +78,7 @@ module.exports = function registerCastsCommand(bot) {
         `,
         params
       );
-      console.log(res);
+      
       if (res.rowCount !== ids.length) {
         const found = res.rows.map(r => String(r.pubg_id));
         const missing = ids.filter(id => !found.includes(id));
@@ -90,7 +90,7 @@ module.exports = function registerCastsCommand(bot) {
       }
 
       // 3. Получаем номер команды
-      const teamRes = await db.query(
+    /*  const teamRes = await db.query(
         `
           SELECT COALESCE(MAX(team_no), 0) AS max_team
           FROM tournament_participants
@@ -99,7 +99,34 @@ module.exports = function registerCastsCommand(bot) {
         [tournament.id]
       );
 
-      const nextTeamNo = (teamRes.rows[0].max_team || 1) + 1;
+      const nextTeamNo = (teamRes.rows[0].max_team || 1) + 1; */
+
+      const teamRes = await db.query(
+        `
+          WITH used AS (
+            SELECT DISTINCT team_no
+            FROM tournament_participants
+            WHERE tournament_id = $1
+          ),
+          mx AS (
+            SELECT COALESCE(MAX(team_no), 1) AS m
+            FROM used
+          ),
+          candidates AS (
+            SELECT generate_series(2, (SELECT m FROM mx) + 1) AS n
+          )
+          SELECT n
+          FROM candidates c
+          LEFT JOIN used u ON u.team_no = c.n
+          WHERE u.team_no IS NULL
+          ORDER BY n
+          LIMIT 1
+        `,
+        [tournament.id]
+      );
+
+      const nextTeamNo = teamRes.rows[0].n;
+
 
       // 4. Записываем участников
       const values = [];
