@@ -90,6 +90,7 @@ require("./messages/activityInfo")(bot);
 require("./startWelcome/registerClanWizard")(bot);
 require("./startWelcome/bindChats")(bot);
 require("./handlers/muteMember")(bot);
+require("./handlers/broadcastAll")(bot);
 
 require("./handlers/synthSheet")(bot, auth, SPREADSHEET_ID);
 require("./update/updateClan")(bot, auth, SPREADSHEET_ID);
