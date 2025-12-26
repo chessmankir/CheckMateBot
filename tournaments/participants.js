@@ -78,7 +78,9 @@ module.exports = function registerCastsCommand(bot) {
         `,
         params
       );
-      
+      console.log(res.rows);
+      console.log(ids.length);
+      console.log(res.rowCount);
       if (res.rowCount !== ids.length) {
         const found = res.rows.map(r => String(r.pubg_id));
         const missing = ids.filter(id => !found.includes(id));
