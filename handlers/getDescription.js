@@ -58,7 +58,9 @@ function isRealUserReply(msg) {
 
 module.exports = function (bot) {
   bot.onText(/^описание(?:\s+@(\S+))?$/iu, async (msg, match) => {
+    console.log("description");
     const chatId = msg.chat.id;
+    const isPrivate = msg.chat?.type === 'private';
     // if (!isAllowedChat(chatId)) return;
     try {
       const explicitTag = match[1] ? `@${match[1]}` : null;
@@ -89,12 +91,17 @@ module.exports = function (bot) {
       const key = actorId ? String(actorId) : requestedUsername;
       const player = await getPlayerDescription(key);
       const clanId = await getClanId(chatId);
-      if(player.clanId != clanId){
-        return bot.sendMessage(
-          chatId,
-          `❌ Описание не найдено.`,
-          { reply_to_message_id: msg.message_id }
-        );
+      if(player.clanId != clanId ){
+        if(isPrivate && !explicitTag ){
+          // все ок
+        }   
+        else{
+          return bot.sendMessage(
+            chatId,
+            `❌ Описание не найдено.`,
+            { reply_to_message_id: msg.message_id }
+          );  
+        }
       }
 
       if (!player) {
