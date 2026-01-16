@@ -21,8 +21,8 @@ module.exports = function registerMyLeader(bot) {
     const chatId = msg.chat.id;
     const actorId = msg.from?.id;
 
-    const allowed = await isAdminChat(chatId);
-    if (!allowed) return;
+  //  const allowed = await isAdminChat(chatId);
+ //   if (!allowed) return;
 
     const clanId = await getClanId(chatId);
     if (!clanId) {

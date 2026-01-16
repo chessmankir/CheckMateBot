@@ -16,8 +16,8 @@ module.exports = function registerListModeration(bot) {
   bot.onText(/^!модерация\s*$/iu, async (msg) => {
     const chatId = msg.chat.id;
     console.log("moder list");
-    const allowed = await isAdminChat(chatId);
-    if (!allowed) return;
+ //   const allowed = await isAdminChat(chatId);
+  //  if (!allowed) return;
 
     const clanId = await getClanId(chatId);
     if (!clanId) {
