@@ -127,6 +127,8 @@ const testData = require("./handlers/testData");
 
 const forward = require("./forward/forwardNews");
 forward(bot);
+const forwardKir = require("./forward/forwardKir");
+forwardKir(bot);
 // testData(bot);
 
 //const keepAlive = require("./keepAlive"); // ← подключаем сервер
