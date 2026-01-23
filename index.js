@@ -129,7 +129,13 @@ const forward = require("./forward/forwardNews");
 forward(bot);
 // testData(bot);
 
-const keepAlive = require("./keepAlive"); // ← подключаем сервер
+//const keepAlive = require("./keepAlive"); // ← подключаем сервер
+const keepAlive = require("./keepAlive");
+const registerStreamStartHook = require("./Stream/stream");
+
+/*keepAlive((app) => {
+  registerStreamStartHook(app, bot);
+});*/
 // 🟢 Запускаем HTTP-сервер (не даст Replit заснуть)
 
 const getUserInfo = require("./handlers/getUserInfo");
