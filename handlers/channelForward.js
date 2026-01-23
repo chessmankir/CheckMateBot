@@ -21,7 +21,7 @@ module.exports = function (bot, FROM_CHANNEL_ID, TO_CHAT_ID, clan_id) {
       }
       // Проверяем наличие тега
       if(FROM_CHANNEL_ID == "@uDIMApubgm"){
-        if (/#winenews/i.test(text)) {
+        if (/#стрим/i.test(text)) {
           //  console.log(clan_id);
           if (TO_CHAT_ID == chatId1 || TO_CHAT_ID == chatId2 ){
             const messageId = msg.message_id;
@@ -31,7 +31,7 @@ module.exports = function (bot, FROM_CHANNEL_ID, TO_CHAT_ID, clan_id) {
             catch{
 
             }
-          }
+           }
           return;
           }
           else{
