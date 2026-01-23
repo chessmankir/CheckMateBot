@@ -90,6 +90,7 @@ module.exports = function registerParticipantsListCommand(bot) {
           minute: '2-digit'
         })}`,
         `Статус: 🔵 активный`,
+        `Участников: ` + pRes.rowCount,
         ''
       );
 
