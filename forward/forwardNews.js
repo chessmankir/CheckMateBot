@@ -6,7 +6,7 @@ module.exports = async function (bot) {
     // Получаем список всех чатов
     const allChats = await getAllChats();
     // Проходимся по каждому чату
-    const nameTgk = "@DIMApubgm";
+    const nameTgk = "@uDIMApubgm";
   //  const nameTgk = "@prikolforward";
     for (const chat of allChats) {
      // const chatId = chat.chat_id || chat.id || chat;
