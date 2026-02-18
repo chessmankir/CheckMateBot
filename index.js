@@ -120,6 +120,7 @@ require("./moderation/addModeration")(bot);
 require("./moderation/removeModeration")(bot);
 require("./moderation/listModeration")(bot);
 require("./moderation/myLeader")(bot);
+require("./clan/changeLeaderClan")(bot);
 
 require("./clan/setInviteLink")(bot);
 require("./clan/setInviteMemberLimit")(bot);
